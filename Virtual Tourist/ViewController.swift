@@ -25,7 +25,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     var spinner: ActivityIndicatorView!
     
     let reusableId: String = "pinInfo"
-
+    
+    var editingPins: Bool = false
     
     //
     // Function called when view did load
@@ -34,13 +35,19 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         super.viewDidLoad()
         
         vtMapView.delegate = self
+        appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         
         // Add the long touch to the map
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "handleLongTouch:")
         longPressRecogniser.minimumPressDuration = 1.0
         vtMapView.addGestureRecognizer(longPressRecogniser)
-
+        
+        
+        navigationController?.setToolbarHidden(true, animated: true)
+        
+        checkForPins()
     }
+    
 
     
     //
@@ -53,6 +60,18 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
 
     
     //
+    // Check if exist pins, if does then loop through it and populate the map
+    //
+    func checkForPins() {
+        if let _ = appDelegate.pins {
+            for (_, element) in appDelegate.pins.enumerate() {
+                vtMapView.addAnnotation(element.position)
+            }
+        }
+    }
+    
+    
+    //
     // Handle the long touch
     //
     func handleLongTouch(getstureRecognizer : UIGestureRecognizer){
@@ -63,6 +82,12 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         
         let annotation = MKPointAnnotation()
         annotation.coordinate = touchMapCoordinate
+        
+        if let _ = appDelegate.pins {
+            let arrayLength: Int = appDelegate.pins.count
+            let pinTemp: Pin = Pin(id: arrayLength, position: annotation, photos: [Photo]())
+            appDelegate.pins.append(pinTemp)
+        }
         
         vtMapView.addAnnotation(annotation)
     }
@@ -99,5 +124,34 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         return view
     }
 
+    
+    //
+    // Remove pin
+    //
+    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        
+        if control == annotationView.rightCalloutAccessoryView {
+            
+        }
+    }
+
+    
+    @IBAction func editBtn(sender: AnyObject) {
+        if (!editingPins) {
+            editingPins = true
+            navigationItem.rightBarButtonItem?.title = "Done"
+//            bottomView.hidden = false
+//            toolBarText.hidden = false
+            navigationController?.setToolbarHidden(false, animated: true)
+        } else {
+            editingPins = false
+            navigationItem.rightBarButtonItem?.title = "Edit"
+//            bottomView.hidden = true
+//            toolBarText.hidden = true
+            navigationController?.setToolbarHidden(true, animated: true)
+        }
+    }
+    
+    
 }
 

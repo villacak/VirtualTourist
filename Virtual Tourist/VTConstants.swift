@@ -22,6 +22,8 @@ class VTConstants: NSObject {
     // Field from Pin entity
     static let latitude: String = "latitude"
     static let longitude: String = "longitude"
+    static let photos: String = "photos"
+    static let position: String = "position"
     
     
     // General constants

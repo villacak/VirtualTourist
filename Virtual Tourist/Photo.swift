@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 
 
-class Photo: NSObject {
+struct Photo {
     
 //    struct Keys {
 //        static let photo = "photo"
@@ -19,6 +19,7 @@ class Photo: NSObject {
     var id: NSNumber = 0
     var photo: NSData = NSData()
     
+    init(){}
     
     init(id: NSNumber, photo: NSData) {
         self.id = id
