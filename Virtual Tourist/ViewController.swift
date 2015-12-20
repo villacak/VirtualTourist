@@ -21,12 +21,16 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     var appDelegate: AppDelegate!
-    
     var spinner: ActivityIndicatorView!
     
     let reusableId: String = "pinInfo"
-    
     var editingPins: Bool = false
+    
+    var filePath : String {
+        let manager = NSFileManager.defaultManager()
+        let url = manager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first! as NSURL
+        return url.URLByAppendingPathComponent("mapRegionArchive").path!
+    }
     
     //
     // Function called when view did load
@@ -37,18 +41,19 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         vtMapView.delegate = self
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         
-        // Add the long touch to the map
-        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "handleLongTouch:")
-        longPressRecogniser.minimumPressDuration = 1.0
-        vtMapView.addGestureRecognizer(longPressRecogniser)
         
-        
+        // Add the touch listener
+        let shortPressRecogniser = UITapGestureRecognizer(target:self, action:"handleShortTouch:")
+        vtMapView.addGestureRecognizer(shortPressRecogniser)
+    
         navigationController?.setToolbarHidden(true, animated: true)
         
         checkForPins()
+        
+        restoreMapRegion(false)
     }
     
-
+    
     
     //
     // Function called when receiving a memory warning
@@ -57,7 +62,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     
     //
     // Check if exist pins, if does then loop through it and populate the map
@@ -72,26 +77,26 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     //
-    // Handle the long touch
+    // Handle the tap touch
     //
-    func handleLongTouch(getstureRecognizer : UIGestureRecognizer){
-        if getstureRecognizer.state != .Began { return }
+    func handleShortTouch(getstureRecognizer : UIGestureRecognizer) { //(recognizer:UIPanGestureRecognizer) {
         
-        let touchPoint = getstureRecognizer.locationInView(self.vtMapView)
-        let touchMapCoordinate = vtMapView.convertPoint(touchPoint, toCoordinateFromView: vtMapView)
-        
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = touchMapCoordinate
-        
-        if let _ = appDelegate.pins {
-            let arrayLength: Int = appDelegate.pins.count
-            let pinTemp: Pin = Pin(id: arrayLength, position: annotation, photos: [Photo]())
-            appDelegate.pins.append(pinTemp)
+        //  If editing map, mean tapped on the edit navigation buttom
+        if (editingPins == false) {
+            let touchPoint = getstureRecognizer.locationInView(self.vtMapView)
+            let touchMapCoordinate: CLLocationCoordinate2D = vtMapView.convertPoint(touchPoint, toCoordinateFromView: vtMapView)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = touchMapCoordinate
+            
+            if let _ = appDelegate.pins {
+                let arrayLength: Int = appDelegate.pins.count
+                let pinTemp: Pin = Pin(id: arrayLength, position: annotation, photos: [Photo]())
+                appDelegate.pins.append(pinTemp)
+            }
+            vtMapView.addAnnotation(annotation)
         }
-        
-        vtMapView.addAnnotation(annotation)
     }
-
+    
     
     //
     // Add view to show the spin
@@ -105,53 +110,94 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Check for annotations for display
     //
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-        if !(annotation is MKPointAnnotation) {
-            return nil
+        func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+            if !(annotation is MKPointAnnotation) {
+                return nil
+            }
+
+            var view: MKPinAnnotationView
+            if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
+                dequeuedView.annotation = annotation
+                view = dequeuedView
+            } else {
+                view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reusableId)
+            }
+            view.animatesDrop = true
+            return view
         }
-        
-        var view: MKPinAnnotationView
-        if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
-            dequeuedView.annotation = annotation
-            view = dequeuedView
-        } else {
-            view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reusableId)
-            view.canShowCallout = true
-            view.calloutOffset = CGPoint(x: -5, y: 5)
-            view.rightCalloutAccessoryView = UIButton(type: UIButtonType.DetailDisclosure) as UIView
-        }
-        view.animatesDrop = true
-        return view
-    }
+    
 
     
     //
-    // Remove pin
+    // check everytime that
     //
-    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        
-        if control == annotationView.rightCalloutAccessoryView {
-            
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        if (editingPins == true) {
+            if let _ = view.annotation {
+                mapView.removeAnnotation(view.annotation!)
+            }
         }
     }
-
     
+    
+    //
+    // Save the Map region
+    //
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        saveMapRegion()
+    }
+    
+    
+    //
+    // Edit button that change to done and vice versa
+    //
     @IBAction func editBtn(sender: AnyObject) {
         if (!editingPins) {
             editingPins = true
             navigationItem.rightBarButtonItem?.title = "Done"
-//            bottomView.hidden = false
-//            toolBarText.hidden = false
             navigationController?.setToolbarHidden(false, animated: true)
         } else {
             editingPins = false
             navigationItem.rightBarButtonItem?.title = "Edit"
-//            bottomView.hidden = true
-//            toolBarText.hidden = true
             navigationController?.setToolbarHidden(true, animated: true)
         }
     }
     
     
+    
+    func saveMapRegion() {
+        // Place the "center" and "span" of the map into a dictionary
+        // The "span" is the width and height of the map in degrees.
+        // It represents the zoom level of the map.
+        
+        let dictionary = [
+            "latitude" : vtMapView.region.center.latitude,
+            "longitude" : vtMapView.region.center.longitude,
+            "latitudeDelta" : vtMapView.region.span.latitudeDelta,
+            "longitudeDelta" : vtMapView.region.span.longitudeDelta
+        ]
+        
+        // Archive the dictionary into the filePath
+        NSKeyedArchiver.archiveRootObject(dictionary, toFile: filePath)
+    }
+    
+    
+    
+    func restoreMapRegion(animated: Bool) {
+        // if we can unarchive a dictionary, we will use it to set the map back to its
+        // previous center and span
+        if let regionDictionary = NSKeyedUnarchiver.unarchiveObjectWithFile(filePath) as? [String : AnyObject] {
+            let longitude = regionDictionary["longitude"] as! CLLocationDegrees
+            let latitude = regionDictionary["latitude"] as! CLLocationDegrees
+            let center = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            
+            let longitudeDelta = regionDictionary["latitudeDelta"] as! CLLocationDegrees
+            let latitudeDelta = regionDictionary["longitudeDelta"] as! CLLocationDegrees
+            let span = MKCoordinateSpan(latitudeDelta: latitudeDelta, longitudeDelta: longitudeDelta)
+            
+            let savedRegion = MKCoordinateRegion(center: center, span: span)
+            vtMapView.setRegion(savedRegion, animated: animated)
+        }
+    }
 }
 
