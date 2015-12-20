@@ -98,7 +98,17 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 let pinTemp: Pin = Pin(id: arrayLength, position: annotation, photos: [Photo]())
                 appDelegate.pins.append(pinTemp)
             }
-            vtMapView.addAnnotation(annotation)
+            
+            let tempPinToAdd: Pin = Pin(id: vtMapView.annotations.count, position: annotation, photos: [Photo]())
+            
+            if let _ = appDelegate.pins {
+                appDelegate.pins.append(tempPinToAdd)
+                vtMapView.addAnnotation(annotation)
+            } else {
+                appDelegate.pins = [Pin]()
+                appDelegate.pins.append(tempPinToAdd)
+                vtMapView.addAnnotation(annotation)
+            }
         }
     }
     
@@ -153,7 +163,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     
                     if let _ = appDelegate.pinSelected {
                         performSegueWithIdentifier("callPicGrid", sender: self)
-                        storyboard!.instantiateViewControllerWithIdentifier("PicGrid") as! PictureGridViewController
+//                        storyboard!.instantiateViewControllerWithIdentifier("PicGrid") as! PictureGridViewController
+                        navigationItem.title = "OK"
                     }
                 }
             }
