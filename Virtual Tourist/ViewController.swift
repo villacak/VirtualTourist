@@ -43,9 +43,14 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         
         
         // Add the touch listener
-        let shortPressRecogniser = UITapGestureRecognizer(target:self, action:"handleShortTouch:")
-        vtMapView.addGestureRecognizer(shortPressRecogniser)
-    
+        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "handleLongTouch:")
+        longPressRecogniser.minimumPressDuration = 0.8
+        vtMapView.addGestureRecognizer(longPressRecogniser)
+        
+        // This is for the simple tap
+        //        let shortPressRecogniser = UITapGestureRecognizer(target:self, action:"handleShortTouch:")
+        //        vtMapView.addGestureRecognizer(shortPressRecogniser)
+        
         navigationController?.setToolbarHidden(true, animated: true)
         
         checkForPins()
@@ -79,7 +84,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Handle the tap touch
     //
-    func handleShortTouch(getstureRecognizer : UIGestureRecognizer) { //(recognizer:UIPanGestureRecognizer) {
+    func handleLongTouch(getstureRecognizer : UIGestureRecognizer) {
         
         //  If editing map, mean tapped on the edit navigation buttom
         if (editingPins == false) {
@@ -110,31 +115,33 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Check for annotations for display
     //
-        func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
-            if !(annotation is MKPointAnnotation) {
-                return nil
-            }
-
-            var view: MKPinAnnotationView
-            if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
-                dequeuedView.annotation = annotation
-                view = dequeuedView
-            } else {
-                view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reusableId)
-            }
-            view.animatesDrop = true
-            return view
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+        if !(annotation is MKPointAnnotation) {
+            return nil
         }
+        
+        var view: MKPinAnnotationView
+        if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
+            dequeuedView.annotation = annotation
+            view = dequeuedView
+        } else {
+            view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reusableId)
+        }
+        view.animatesDrop = true
+        return view
+    }
     
-
+    
     
     //
     // check everytime that
     //
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        if (editingPins == true) {
-            if let _ = view.annotation {
+        if let _ = view.annotation {
+            if (editingPins == true) {
                 mapView.removeAnnotation(view.annotation!)
+            } else {
+                // Add here the redirection to the next view.
             }
         }
     }
