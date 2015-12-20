@@ -151,7 +151,19 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Save the Map region
     //
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        saveMapRegion()
+        // Place the "center" and "span" of the map into a dictionary
+        // The "span" is the width and height of the map in degrees.
+        // It represents the zoom level of the map.
+        
+        let dictionary = [
+            "latitude" : vtMapView.region.center.latitude,
+            "longitude" : vtMapView.region.center.longitude,
+            "latitudeDelta" : vtMapView.region.span.latitudeDelta,
+            "longitudeDelta" : vtMapView.region.span.longitudeDelta
+        ]
+        
+        // Archive the dictionary into the filePath
+        NSKeyedArchiver.archiveRootObject(dictionary, toFile: filePath)
     }
     
     
@@ -171,25 +183,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     }
     
     
-    
-    func saveMapRegion() {
-        // Place the "center" and "span" of the map into a dictionary
-        // The "span" is the width and height of the map in degrees.
-        // It represents the zoom level of the map.
-        
-        let dictionary = [
-            "latitude" : vtMapView.region.center.latitude,
-            "longitude" : vtMapView.region.center.longitude,
-            "latitudeDelta" : vtMapView.region.span.latitudeDelta,
-            "longitudeDelta" : vtMapView.region.span.longitudeDelta
-        ]
-        
-        // Archive the dictionary into the filePath
-        NSKeyedArchiver.archiveRootObject(dictionary, toFile: filePath)
-    }
-    
-    
-    
+    //
+    // Function to restore the Map Region
+    //
     func restoreMapRegion(animated: Bool) {
         // if we can unarchive a dictionary, we will use it to set the map back to its
         // previous center and span
