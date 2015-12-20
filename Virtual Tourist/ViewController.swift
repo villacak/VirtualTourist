@@ -142,6 +142,20 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 mapView.removeAnnotation(view.annotation!)
             } else {
                 // Add here the redirection to the next view.
+                if let _ = appDelegate.pins {
+                    for tempPin: Pin in appDelegate.pins {
+                        if tempPin.position.coordinate.latitude == view.annotation!.coordinate.latitude &&
+                           tempPin.position.coordinate.longitude == view.annotation!.coordinate.longitude {
+                           appDelegate.pinSelected = tempPin
+                           break
+                        }
+                    }
+                    
+                    if let _ = appDelegate.pinSelected {
+                        performSegueWithIdentifier("callPicGrid", sender: self)
+                        storyboard!.instantiateViewControllerWithIdentifier("PicGrid") as! PictureGridViewController
+                    }
+                }
             }
         }
     }

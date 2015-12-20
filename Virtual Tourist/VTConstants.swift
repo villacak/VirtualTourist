@@ -25,6 +25,9 @@ class VTConstants: NSObject {
     static let photos: String = "photos"
     static let position: String = "position"
     
+    // Pins
+    static let pins: String = "pins"
+    
     
     // General constants
     static let empty: String = ""

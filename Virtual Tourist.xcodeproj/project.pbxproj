@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3357CED71C2654D900C577EE /* PictureGridViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CED61C2654D900C577EE /* PictureGridViewController.swift */; };
 		3357CED91C265B1400C577EE /* PinCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */; };
+		3357CEDB1C2705FC00C577EE /* Pins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CEDA1C2705FC00C577EE /* Pins.swift */; };
 		3392039A1C13C98B0023D4C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339203991C13C98B0023D4C9 /* AppDelegate.swift */; };
 		3392039C1C13C98B0023D4C9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392039B1C13C98B0023D4C9 /* ViewController.swift */; };
 		3392039F1C13C98B0023D4C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3392039D1C13C98B0023D4C9 /* Main.storyboard */; };
@@ -27,6 +28,7 @@
 /* Begin PBXFileReference section */
 		3357CED61C2654D900C577EE /* PictureGridViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureGridViewController.swift; sourceTree = "<group>"; };
 		3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinCollectionViewCell.swift; sourceTree = "<group>"; };
+		3357CEDA1C2705FC00C577EE /* Pins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pins.swift; sourceTree = "<group>"; };
 		339203961C13C98B0023D4C9 /* Virtual Tourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Virtual Tourist.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		339203991C13C98B0023D4C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3392039B1C13C98B0023D4C9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -95,6 +97,7 @@
 				3394F3AB1C13E4E70019ABA7 /* Photo.swift */,
 				33A608A91C166E6300A7D744 /* Pin.swift */,
 				3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */,
+				3357CEDA1C2705FC00C577EE /* Pins.swift */,
 			);
 			name = domain;
 			sourceTree = "<group>";
@@ -192,6 +195,7 @@
 				3357CED91C265B1400C577EE /* PinCollectionViewCell.swift in Sources */,
 				3392039A1C13C98B0023D4C9 /* AppDelegate.swift in Sources */,
 				3394F3B61C1519ED0019ABA7 /* Dialog.swift in Sources */,
+				3357CEDB1C2705FC00C577EE /* Pins.swift in Sources */,
 				3357CED71C2654D900C577EE /* PictureGridViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

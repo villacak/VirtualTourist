@@ -29,12 +29,12 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 0
+        return appDelegate.pinSelected.photos.count
     }
     
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let pin: Pin = appDelegate.pins[indexPath.row] as Pin!
+        let pin: Pin = appDelegate.pinSelected as Pin!
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PictureSecondView", forIndexPath: indexPath) as! PinCollectionViewCell
         return cell
