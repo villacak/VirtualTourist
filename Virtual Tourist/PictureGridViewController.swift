@@ -25,6 +25,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         
+        let backButton: UIBarButtonItem = UIBarButtonItem()
+        backButton.title = "OK"
+        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
+        
         if appDelegate.pinSelected.photos.count > 0 {
             photos = appDelegate.pinSelected.photos
             picturesGridCol.hidden = false
@@ -51,6 +55,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let viewRegion = MKCoordinateRegionMakeWithDistance(userLocation, 500, 500)
         vtMapView.setRegion(viewRegion, animated: false)
     }
+    
+    
 
 
     

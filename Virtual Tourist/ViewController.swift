@@ -41,7 +41,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         vtMapView.delegate = self
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         
-        
         // Add the touch listener
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "handleLongTouch:")
         longPressRecogniser.minimumPressDuration = 0.8
@@ -163,8 +162,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     
                     if let _ = appDelegate.pinSelected {
                         performSegueWithIdentifier("callPicGrid", sender: self)
-//                        storyboard!.instantiateViewControllerWithIdentifier("PicGrid") as! PictureGridViewController
-                        navigationItem.title = "OK"
                     }
                 }
             }

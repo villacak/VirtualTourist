@@ -13,6 +13,8 @@ import Foundation
 //
 class VTConstants: NSObject {
     
+    static let appTitle: String = "Virtual Tourist"
+    
     // id for both entities
     static let id: String = "id"
 
