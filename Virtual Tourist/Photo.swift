@@ -17,11 +17,11 @@ struct Photo {
 //    }
     
     var id: NSNumber = 0
-    var photo: NSData = NSData()
+    var photo: UIImage = UIImage()
     
     init(){}
     
-    init(id: NSNumber, photo: NSData) {
+    init(id: NSNumber, photo: UIImage) {
         self.id = id
         self.photo = photo
     }
@@ -31,7 +31,7 @@ struct Photo {
             id = tempObjectId as! NSNumber
         }
         if let tempObjectId = photoDictionary[VTConstants.photo] {
-            photo = tempObjectId as! NSData
+            photo = tempObjectId as! UIImage
         }
     }
 }
