@@ -13,7 +13,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     
     @IBOutlet weak var picturesGridCol: UICollectionView!
-    @IBOutlet weak var noImageLbl: UICollectionView!
+    @IBOutlet weak var noImageLbl: UILabel!
     @IBOutlet weak var newCollectionBtn: UIButton!
     @IBOutlet weak var vtMapView: MKMapView!
     

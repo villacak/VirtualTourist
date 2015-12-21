@@ -74,6 +74,7 @@
                             </mapView>
                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Images" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lZ6-VJ-y4j">
                                 <rect key="frame" x="237" y="396" width="126" height="30"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="EX4-Q2-mWh"/>
                                     <constraint firstAttribute="width" constant="126" id="bmF-P2-Ik5"/>
@@ -143,7 +144,7 @@
                     </view>
                     <connections>
                         <outlet property="newCollectionBtn" destination="epg-uv-WpA" id="qcy-Vb-W4I"/>
-                        <outlet property="noImageLbl" destination="Act-KA-oys" id="nlg-xf-fVY"/>
+                        <outlet property="noImageLbl" destination="lZ6-VJ-y4j" id="OuF-Te-CQE"/>
                         <outlet property="picturesGridCol" destination="Act-KA-oys" id="PYP-o1-tYd"/>
                         <outlet property="vtMapView" destination="6Q7-fD-cIp" id="ffJ-x1-1Z6"/>
                     </connections>
