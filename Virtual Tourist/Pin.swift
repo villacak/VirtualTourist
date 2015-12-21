@@ -8,35 +8,38 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-struct Pin {
+class Pin: NSManagedObject {
     
-    var id: NSNumber = 0
-    var position: MKPointAnnotation = MKPointAnnotation()
-    var photos: [Photo] = [Photo]()
-    
-    
-    //
-    // Empty initializer
-    //
-    init() {}
-    
-    
-    init(id: NSNumber, position: MKPointAnnotation, photos: [Photo]) {
-        self.id = id
-        self.position = position
-        self.photos = photos
+    struct Keys {
+        static let ID = "id"
+        static let position = "position"
+        static let photos = "photos"
     }
     
-    init(photoDictionary: Dictionary<String, AnyObject>) {
+    @NSManaged var id: NSNumber
+    @NSManaged var position: MKPointAnnotation?
+    @NSManaged var photos: [Photo]?
+    
+    
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    
+    
+    init(photoDictionary: Dictionary<String, AnyObject>, context: NSManagedObjectContext) {
+        let entity =  NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
+        super.init(entity: entity,insertIntoManagedObjectContext: context)
+        
         if let tempObjectId = photoDictionary[VTConstants.id] {
             id = tempObjectId as! NSNumber
         }
         if let tempObjectId = photoDictionary[VTConstants.position] {
-            position = tempObjectId as! MKPointAnnotation
+            position = tempObjectId as? MKPointAnnotation
         }
         if let tempObjectId = photoDictionary[VTConstants.photos] {
-            photos = tempObjectId as! [Photo]
+            photos = tempObjectId as? [Photo]
         }
     }
 

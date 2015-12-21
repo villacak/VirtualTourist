@@ -10,28 +10,31 @@ import UIKit
 import CoreData
 
 
-struct Photo {
+class Photo: NSManagedObject {
     
-//    struct Keys {
-//        static let photo = "photo"
-//    }
-    
-    var id: NSNumber = 0
-    var photo: UIImage = UIImage()
-    
-    init(){}
-    
-    init(id: NSNumber, photo: UIImage) {
-        self.id = id
-        self.photo = photo
+    struct Keys {
+        static let photo = "photo"
     }
     
-    init(photoDictionary: Dictionary<String, AnyObject>) {
+    
+    @NSManaged var id: NSNumber
+    @NSManaged var photo: UIImage?
+    
+    
+    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    }
+    
+    
+    init(photoDictionary: Dictionary<String, AnyObject>, context: NSManagedObjectContext) {
+        let entity =  NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
+        super.init(entity: entity, insertIntoManagedObjectContext: context)
+        
         if let tempObjectId = photoDictionary[VTConstants.id] {
             id = tempObjectId as! NSNumber
         }
         if let tempObjectId = photoDictionary[VTConstants.photo] {
-            photo = tempObjectId as! UIImage
+            photo = tempObjectId as? UIImage
         }
     }
 }
