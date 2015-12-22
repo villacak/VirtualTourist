@@ -10,6 +10,7 @@
 		3357CED71C2654D900C577EE /* PictureGridViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CED61C2654D900C577EE /* PictureGridViewController.swift */; };
 		3357CED91C265B1400C577EE /* PinCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */; };
 		3357CEDB1C2705FC00C577EE /* Pins.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CEDA1C2705FC00C577EE /* Pins.swift */; };
+		3357CEDD1C28FA7000C577EE /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3357CEDC1C28FA7000C577EE /* Utils.swift */; };
 		3392039A1C13C98B0023D4C9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339203991C13C98B0023D4C9 /* AppDelegate.swift */; };
 		3392039C1C13C98B0023D4C9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392039B1C13C98B0023D4C9 /* ViewController.swift */; };
 		3392039F1C13C98B0023D4C9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3392039D1C13C98B0023D4C9 /* Main.storyboard */; };
@@ -29,6 +30,7 @@
 		3357CED61C2654D900C577EE /* PictureGridViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PictureGridViewController.swift; sourceTree = "<group>"; };
 		3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinCollectionViewCell.swift; sourceTree = "<group>"; };
 		3357CEDA1C2705FC00C577EE /* Pins.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pins.swift; sourceTree = "<group>"; };
+		3357CEDC1C28FA7000C577EE /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		339203961C13C98B0023D4C9 /* Virtual Tourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Virtual Tourist.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		339203991C13C98B0023D4C9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3392039B1C13C98B0023D4C9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				3394F3B21C1517AE0019ABA7 /* VTConstants.swift */,
 				3394F3B51C1519ED0019ABA7 /* Dialog.swift */,
 				3394F3B71C151AAF0019ABA7 /* ActivityIndicatorView.swift */,
+				3357CEDC1C28FA7000C577EE /* Utils.swift */,
 			);
 			name = utils;
 			sourceTree = "<group>";
@@ -187,6 +190,7 @@
 				3394F3AC1C13E4E70019ABA7 /* Photo.swift in Sources */,
 				3392039C1C13C98B0023D4C9 /* ViewController.swift in Sources */,
 				3394F3B31C1517AE0019ABA7 /* VTConstants.swift in Sources */,
+				3357CEDD1C28FA7000C577EE /* Utils.swift in Sources */,
 				339203A21C13C98B0023D4C9 /* Virtual_Tourist.xcdatamodeld in Sources */,
 				3394F3AE1C13E5BB0019ABA7 /* CoreDataStackManager.swift in Sources */,
 				33A608AA1C166E6300A7D744 /* Pin.swift in Sources */,

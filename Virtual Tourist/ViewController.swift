@@ -12,8 +12,9 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
+class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, NSFetchedResultsControllerDelegate {
     
     
     @IBOutlet weak var editBtn: UIBarButtonItem!
@@ -32,6 +33,22 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         return url.URLByAppendingPathComponent("mapRegionArchive").path!
     }
     
+    var sharedContext: NSManagedObjectContext {
+        return CoreDataStackManager.sharedInstance().managedObjectContext
+    }
+    
+    
+    lazy var fetchedResultsController: NSFetchedResultsController = {
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+        
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
+            managedObjectContext: self.sharedContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil)
+        return fetchedResultsController
+    }()
+    
     //
     // Function called when view did load
     //
@@ -41,30 +58,20 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         vtMapView.delegate = self
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         
+        appDelegate.pins = [Pin]()
+        
         // Add the touch listener
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "handleLongTouch:")
         longPressRecogniser.minimumPressDuration = 0.8
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
-        // This is for the simple tap
-        //        let shortPressRecogniser = UITapGestureRecognizer(target:self, action:"handleShortTouch:")
-        //        vtMapView.addGestureRecognizer(shortPressRecogniser)
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {}
         
         navigationController?.setToolbarHidden(true, animated: true)
-        
         checkForPins()
-        
         restoreMapRegion(false)
-    }
-    
-    
-    
-    //
-    // Function called when receiving a memory warning
-    //
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     
@@ -74,10 +81,11 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     func checkForPins() {
         if let _ = appDelegate.pins {
             for (_, element) in appDelegate.pins.enumerate() {
-                vtMapView.addAnnotation(element.position)
+                vtMapView.addAnnotation(element.position!)
             }
         }
     }
+    
     
     
     //
@@ -92,22 +100,15 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             let annotation = MKPointAnnotation()
             annotation.coordinate = touchMapCoordinate
             
-            if let _ = appDelegate.pins {
-                let arrayLength: Int = appDelegate.pins.count
-                let pinTemp: Pin = Pin(id: arrayLength, position: annotation, photos: [Photo]())
-                appDelegate.pins.append(pinTemp)
-            }
+            let arrayLength: Int = appDelegate.pins.count
+            let dictionary: Dictionary<String, AnyObject> = [
+                Pin.Keys.ID : arrayLength,
+                Pin.Keys.position : annotation,
+                Pin.Keys.photos : [Photo]()
+            ]
             
-            let tempPinToAdd: Pin = Pin(id: vtMapView.annotations.count, position: annotation, photos: [Photo]())
-            
-            if let _ = appDelegate.pins {
-                appDelegate.pins.append(tempPinToAdd)
-                vtMapView.addAnnotation(annotation)
-            } else {
-                appDelegate.pins = [Pin]()
-                appDelegate.pins.append(tempPinToAdd)
-                vtMapView.addAnnotation(annotation)
-            }
+            let pinTemp: Pin = Pin(photoDictionary: dictionary, context: sharedContext)
+            appDelegate.pins.append(pinTemp)
         }
     }
     
@@ -149,14 +150,16 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         if let _ = view.annotation {
             if (editingPins == true) {
                 mapView.removeAnnotation(view.annotation!)
+                let util: Utils = Utils()
+                appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
             } else {
                 // Add here the redirection to the next view.
                 if let _ = appDelegate.pins {
                     for tempPin: Pin in appDelegate.pins {
-                        if tempPin.position.coordinate.latitude == view.annotation!.coordinate.latitude &&
-                           tempPin.position.coordinate.longitude == view.annotation!.coordinate.longitude {
-                           appDelegate.pinSelected = tempPin
-                           break
+                        if tempPin.position!.coordinate.latitude == view.annotation!.coordinate.latitude &&
+                           tempPin.position!.coordinate.longitude == view.annotation!.coordinate.longitude {
+                                appDelegate.pinSelected = tempPin
+                                break
                         }
                     }
                     
