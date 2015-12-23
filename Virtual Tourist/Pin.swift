@@ -14,12 +14,14 @@ class Pin: NSManagedObject {
     
     struct Keys {
         static let ID = "id"
-        static let position = "position"
+        static let latitude = "latitude"
+        static let longitude = "longitude"
         static let photos = "photos"
     }
     
     @NSManaged var id: NSNumber
-    @NSManaged var position: MKPointAnnotation?
+    @NSManaged var latitude: NSNumber
+    @NSManaged var longitude: NSNumber
     @NSManaged var photos: [Photo]?
     
     
@@ -28,19 +30,25 @@ class Pin: NSManagedObject {
     }
     
     
-    init(photoDictionary: Dictionary<String, AnyObject>, context: NSManagedObjectContext) {
+    init(photoDictionary: [String: AnyObject], context: NSManagedObjectContext) {
         let entity =  NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
         super.init(entity: entity,insertIntoManagedObjectContext: context)
         
-        if let tempObjectId = photoDictionary[VTConstants.id] {
-            id = tempObjectId as! NSNumber
-        }
-        if let tempObjectId = photoDictionary[VTConstants.position] {
-            position = tempObjectId as? MKPointAnnotation
-        }
-        if let tempObjectId = photoDictionary[VTConstants.photos] {
-            photos = tempObjectId as? [Photo]
-        }
+        id = photoDictionary[Keys.ID] as! NSNumber
+        
+        print("Latitude \(photoDictionary[Keys.latitude] as! Double)")
+        latitude = photoDictionary[Keys.latitude] as! Double
+        longitude = photoDictionary[Keys.longitude] as! Double
+        photos = photoDictionary[Keys.photos] as? [Photo]
+        
+//        if let tempObjectId: NSNumber = photoDictionary[VTConstants.id] as? NSNumber {
+//        }
+//        if let tempObjectLat: Double = photoDictionary[VTConstants.latitude] as? Double {
+//        }
+//        if let tempObjectLon: Double = photoDictionary[VTConstants.longitude] as? Double {
+//        }
+//        if let tempObjectPhotos: [Photo] = photoDictionary[VTConstants.photos] as? [Photo] {
+//        }
     }
 
 }

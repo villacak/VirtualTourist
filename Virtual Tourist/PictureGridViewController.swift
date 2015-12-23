@@ -29,8 +29,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         backButton.title = "OK"
         navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
         
-        if appDelegate.pinSelected.photos.count > 0 {
-            photos = appDelegate.pinSelected.photos
+        if appDelegate.pinSelected!.photos!.count > 0 {
+            photos = appDelegate.pinSelected!.photos
             picturesGridCol.hidden = false
             noImageLbl.hidden = true
             newCollectionBtn.enabled = false
@@ -46,7 +46,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
         
-        let tempPointAnnotation: MKPointAnnotation = appDelegate.pinSelected.position
+        let doubleLat: Double = Double((appDelegate.pinSelected?.latitude)!)
+        let doubleLon: Double = Double((appDelegate.pinSelected?.longitude)!)
+        
+        let utils: Utils = Utils()
+        let tempPointAnnotation: MKPointAnnotation = utils.retrieveAnnotation(latitude: doubleLat, longitude: doubleLon)
         vtMapView.addAnnotation(tempPointAnnotation)
         
         let userLocation: CLLocationCoordinate2D = CLLocationCoordinate2DMake(tempPointAnnotation.coordinate.latitude, tempPointAnnotation.coordinate.longitude)

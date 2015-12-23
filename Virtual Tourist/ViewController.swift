@@ -69,6 +69,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             try fetchedResultsController.performFetch()
         } catch {}
         
+        
+        fetchedResultsController.delegate = self
+        
         navigationController?.setToolbarHidden(true, animated: true)
         checkForPins()
         restoreMapRegion(false)
@@ -81,7 +84,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     func checkForPins() {
         if let _ = appDelegate.pins {
             for (_, element) in appDelegate.pins.enumerate() {
-                vtMapView.addAnnotation(element.position!)
+                let tempPin: Pin = element
+                let utils: Utils = Utils()
+                let annotationTempAdd: MKPointAnnotation = utils.retrieveAnnotation(latitude: Double(tempPin.latitude), longitude: Double(tempPin.longitude))
+                vtMapView.addAnnotation(annotationTempAdd)
             }
         }
     }
@@ -101,14 +107,16 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             annotation.coordinate = touchMapCoordinate
             
             let arrayLength: Int = appDelegate.pins.count
-            let dictionary: Dictionary<String, AnyObject> = [
+            let dictionary: [String: AnyObject] = [
                 Pin.Keys.ID : arrayLength,
-                Pin.Keys.position : annotation,
+                Pin.Keys.latitude : annotation.coordinate.latitude as Double,
+                Pin.Keys.longitude : annotation.coordinate.longitude as Double,
                 Pin.Keys.photos : [Photo]()
             ]
             
             let pinTemp: Pin = Pin(photoDictionary: dictionary, context: sharedContext)
             appDelegate.pins.append(pinTemp)
+            CoreDataStackManager.sharedInstance().saveContext()
         }
     }
     
@@ -151,17 +159,24 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             if (editingPins == true) {
                 mapView.removeAnnotation(view.annotation!)
                 let util: Utils = Utils()
-                appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
+                let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)!
+                if let _ = pinToRemove {
+                    appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
+                    sharedContext.deleteObject(pinToRemove!)
+                }
             } else {
                 // Add here the redirection to the next view.
                 if let _ = appDelegate.pins {
-                    for tempPin: Pin in appDelegate.pins {
-                        if tempPin.position!.coordinate.latitude == view.annotation!.coordinate.latitude &&
-                           tempPin.position!.coordinate.longitude == view.annotation!.coordinate.longitude {
-                                appDelegate.pinSelected = tempPin
-                                break
-                        }
-                    }
+                    //                    for tempPin: Pin in appDelegate.pins {
+                    //                        if tempPin.latitude == view.annotation!.coordinate.latitude &&
+                    //                           tempPin.longitude == view.annotation!.coordinate.longitude {
+                    //                                appDelegate.pinSelected = tempPin
+                    //                                break
+                    //                        }
+                    //                    }
+                    
+                    let utils: Utils = Utils()
+                    appDelegate.pinSelected = utils.retrievePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     
                     if let _ = appDelegate.pinSelected {
                         performSegueWithIdentifier("callPicGrid", sender: self)
