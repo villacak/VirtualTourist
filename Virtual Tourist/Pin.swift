@@ -35,20 +35,8 @@ class Pin: NSManagedObject {
         super.init(entity: entity,insertIntoManagedObjectContext: context)
         
         id = photoDictionary[Keys.ID] as! NSNumber
-        
-        print("Latitude \(photoDictionary[Keys.latitude] as! Double)")
         latitude = photoDictionary[Keys.latitude] as! Double
         longitude = photoDictionary[Keys.longitude] as! Double
-        photos = photoDictionary[Keys.photos] as? [Photo]
-        
-//        if let tempObjectId: NSNumber = photoDictionary[VTConstants.id] as? NSNumber {
-//        }
-//        if let tempObjectLat: Double = photoDictionary[VTConstants.latitude] as? Double {
-//        }
-//        if let tempObjectLon: Double = photoDictionary[VTConstants.longitude] as? Double {
-//        }
-//        if let tempObjectPhotos: [Photo] = photoDictionary[VTConstants.photos] as? [Photo] {
-//        }
     }
 
 }

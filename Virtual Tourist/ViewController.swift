@@ -98,6 +98,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Handle the tap touch
     //
     func handleLongTouch(getstureRecognizer : UIGestureRecognizer) {
+        if getstureRecognizer.state == UIGestureRecognizerState.Began { return }
         
         //  If editing map, mean tapped on the edit navigation buttom
         if (editingPins == false) {
@@ -115,8 +116,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             ]
             
             let pinTemp: Pin = Pin(photoDictionary: dictionary, context: sharedContext)
-            appDelegate.pins.append(pinTemp)
             CoreDataStackManager.sharedInstance().saveContext()
+            vtMapView.addAnnotation(annotation)
+            appDelegate.pins.append(pinTemp)
         }
     }
     
@@ -159,7 +161,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             if (editingPins == true) {
                 mapView.removeAnnotation(view.annotation!)
                 let util: Utils = Utils()
-                let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)!
+                print("AppDelegate.pins \(appDelegate.pins)")
+                
+                let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins as [Pin], pinToRemove: view.annotation!)!
                 if let _ = pinToRemove {
                     appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     sharedContext.deleteObject(pinToRemove!)
@@ -167,17 +171,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             } else {
                 // Add here the redirection to the next view.
                 if let _ = appDelegate.pins {
-                    //                    for tempPin: Pin in appDelegate.pins {
-                    //                        if tempPin.latitude == view.annotation!.coordinate.latitude &&
-                    //                           tempPin.longitude == view.annotation!.coordinate.longitude {
-                    //                                appDelegate.pinSelected = tempPin
-                    //                                break
-                    //                        }
-                    //                    }
-                    
                     let utils: Utils = Utils()
                     appDelegate.pinSelected = utils.retrievePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
-                    
                     if let _ = appDelegate.pinSelected {
                         performSegueWithIdentifier("callPicGrid", sender: self)
                     }
