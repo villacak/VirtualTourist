@@ -159,15 +159,13 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         if let _ = view.annotation {
             if (editingPins == true) {
-                mapView.removeAnnotation(view.annotation!)
                 let util: Utils = Utils()
-                print("AppDelegate.pins \(appDelegate.pins)")
-                
                 let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins as [Pin], pinToRemove: view.annotation!)!
                 if let _ = pinToRemove {
                     appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     sharedContext.deleteObject(pinToRemove!)
                 }
+                mapView.removeAnnotation(view.annotation!)
             } else {
                 // Add here the redirection to the next view.
                 if let _ = appDelegate.pins {
