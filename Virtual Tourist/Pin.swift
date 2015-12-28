@@ -13,6 +13,7 @@ import CoreData
 class Pin: NSManagedObject {
     
     struct Keys {
+        static let Pin = "Pin"
         static let ID = "id"
         static let latitude = "latitude"
         static let longitude = "longitude"

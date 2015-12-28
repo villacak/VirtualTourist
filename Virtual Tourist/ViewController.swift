@@ -39,8 +39,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: "Pin")
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+        let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: Pin.Keys.ID, ascending: true)]
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
             managedObjectContext: self.sharedContext,
@@ -65,16 +65,52 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         longPressRecogniser.minimumPressDuration = 0.8
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {}
-        
-        
         fetchedResultsController.delegate = self
         
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("An error has occured")
+        }
+        
+        
         navigationController?.setToolbarHidden(true, animated: true)
+        poulatePinArray()
         checkForPins()
         restoreMapRegion(false)
+    }
+    
+    
+    //
+    // Populate the Pin array from the DB
+    //
+    func poulatePinArray() {
+        if appDelegate.pins == nil || appDelegate.pins!.count == 0 {
+            appDelegate.pins = [Pin]()
+        }
+        if let _ = fetchedResultsController.sections {
+            do {
+                let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
+                fetchRequest.returnsObjectsAsFaults = false
+                let tempPinArray: [AnyObject] = try sharedContext.executeFetchRequest(fetchRequest)
+                if (tempPinArray.count > 0) {
+                    for result: AnyObject in tempPinArray {
+                        let dictionary: [String: AnyObject] = [
+                            Pin.Keys.ID : result.valueForKey(Pin.Keys.ID)! as! NSNumber,
+                            Pin.Keys.latitude : result.valueForKey(Pin.Keys.latitude)! as! Double,
+                            Pin.Keys.longitude : result.valueForKey(Pin.Keys.longitude)! as! Double,
+                            Pin.Keys.photos : [Photo]()
+                        ]
+                        
+                        let pinTemp: Pin = Pin(photoDictionary: dictionary, context: sharedContext)
+                        appDelegate.pins.append(pinTemp)
+                    }
+                }
+            } catch let error as NSError {
+                print("Error : \(error.localizedDescription)")
+                // Need add a popup in here
+            }
+        }
     }
     
     
@@ -158,6 +194,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         if let _ = view.annotation {
+            // Delete or redirect to the next view
             if (editingPins == true) {
                 let util: Utils = Utils()
                 let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins as [Pin], pinToRemove: view.annotation!)!
