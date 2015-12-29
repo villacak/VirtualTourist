@@ -6,18 +6,18 @@
 //  Copyright © 2015 Klaus Villaca. All rights reserved.
 //
 
-import UIKit
-import MapKit
+import Foundation
 import CoreData
 
+@objc(Pin)
 class Pin: NSManagedObject {
     
     struct Keys {
-        static let Pin = "Pin"
-        static let ID = "id"
-        static let latitude = "latitude"
-        static let longitude = "longitude"
-        static let photos = "photos"
+        static let Pin: String = "Pin"
+        static let ID: String = "id"
+        static let latitude: String = "latitude"
+        static let longitude: String = "longitude"
+        static let photos: String = "photos"
     }
     
     @NSManaged var id: NSNumber
@@ -32,10 +32,10 @@ class Pin: NSManagedObject {
     
     
     init(photoDictionary: [String: AnyObject], context: NSManagedObjectContext) {
-        let entity =  NSEntityDescription.entityForName("Pin", inManagedObjectContext: context)!
+        let entity =  NSEntityDescription.entityForName(Pin.Keys.Pin, inManagedObjectContext: context)!
         super.init(entity: entity,insertIntoManagedObjectContext: context)
         
-        id = photoDictionary[Keys.ID] as! NSNumber
+        id = photoDictionary[Keys.ID] as! Int
         latitude = photoDictionary[Keys.latitude] as! Double
         longitude = photoDictionary[Keys.longitude] as! Double
     }

@@ -18,7 +18,7 @@ import CoreData
 *
 */
 
-private let SQLITE_DB_NAME = "VirtualTourist.sqlite"
+private let SQLITE_DB_NAME = "Virtual_Tourist.sqlite"
 
 class CoreDataStackManager {
     

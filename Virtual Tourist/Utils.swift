@@ -27,7 +27,11 @@ class Utils: NSObject {
         }
         
         if let _ = idToRemove {
-            pinArray.removeAtIndex(idToRemove)
+            if idToRemove > 0 {
+                pinArray.removeAtIndex(idToRemove - 1)
+            } else if idToRemove == 0 {
+                pinArray.removeAtIndex(idToRemove)
+            }
         }
         return pinArray
     }

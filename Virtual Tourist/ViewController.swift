@@ -40,7 +40,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: Pin.Keys.ID, ascending: true)]
+        let fetchSort = NSSortDescriptor(key: Pin.Keys.ID, ascending: true)
+        fetchRequest.sortDescriptors = [fetchSort]
         
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
             managedObjectContext: self.sharedContext,
@@ -48,6 +49,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             cacheName: nil)
         return fetchedResultsController
     }()
+    
     
     //
     // Function called when view did load
@@ -65,13 +67,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         longPressRecogniser.minimumPressDuration = 0.8
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
+        callFecthedResultsController()
         fetchedResultsController.delegate = self
-        
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            print("An error has occured")
-        }
         
         
         navigationController?.setToolbarHidden(true, animated: true)
@@ -80,6 +77,17 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         restoreMapRegion(false)
     }
     
+    
+    //
+    // Call fetech results controller
+    //
+    func callFecthedResultsController() {
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("An error has occured")
+        }
+    }
     
     //
     // Populate the Pin array from the DB
@@ -92,18 +100,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             do {
                 let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
                 fetchRequest.returnsObjectsAsFaults = false
-                let tempPinArray: [AnyObject] = try sharedContext.executeFetchRequest(fetchRequest)
+                let tempPinArray: [Pin] = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
                 if (tempPinArray.count > 0) {
-                    for result: AnyObject in tempPinArray {
-                        let dictionary: [String: AnyObject] = [
-                            Pin.Keys.ID : result.valueForKey(Pin.Keys.ID)! as! NSNumber,
-                            Pin.Keys.latitude : result.valueForKey(Pin.Keys.latitude)! as! Double,
-                            Pin.Keys.longitude : result.valueForKey(Pin.Keys.longitude)! as! Double,
-                            Pin.Keys.photos : [Photo]()
-                        ]
-                        
-                        let pinTemp: Pin = Pin(photoDictionary: dictionary, context: sharedContext)
-                        appDelegate.pins.append(pinTemp)
+                    for result: Pin in tempPinArray {
+                        appDelegate.pins.append(result)
                     }
                 }
             } catch let error as NSError {
@@ -145,7 +145,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             
             let arrayLength: Int = appDelegate.pins.count
             let dictionary: [String: AnyObject] = [
-                Pin.Keys.ID : arrayLength,
+                Pin.Keys.ID : arrayLength + 1,
                 Pin.Keys.latitude : annotation.coordinate.latitude as Double,
                 Pin.Keys.longitude : annotation.coordinate.longitude as Double,
                 Pin.Keys.photos : [Photo]()
@@ -196,13 +196,47 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         if let _ = view.annotation {
             // Delete or redirect to the next view
             if (editingPins == true) {
+                var isDeleted: Bool = false
                 let util: Utils = Utils()
                 let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins as [Pin], pinToRemove: view.annotation!)!
+                
                 if let _ = pinToRemove {
-                    appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
-                    sharedContext.deleteObject(pinToRemove!)
+                    // Should have a easier way to retreive one record from DB than doing this, or retrieve from the fetchedResultsController var
+                    let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
+                    fetchRequest.returnsObjectsAsFaults = false
+                    fetchRequest.predicate = NSPredicate(format: "id == %@", (pinToRemove?.id)!)
+                    let sorter: NSSortDescriptor = NSSortDescriptor(key: "id" , ascending: true)
+                    fetchRequest.sortDescriptors = [sorter]
+                    
+                    var result: [Pin]?
+                    do {
+                        result = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
+                    } catch let error as NSError{
+                        print("Error: \(error.localizedDescription)")
+                        result = nil
+                    }
+                    
+                    for resultItem: Pin in result! {
+                        if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
+                            sharedContext.deleteObject(resultItem)
+                            do {
+                                try sharedContext.save()
+                                isDeleted = true
+                                callFecthedResultsController()
+                            } catch let error as NSError {
+                                print("Error : \(error.localizedDescription)")
+                                // Need add a popup in here
+                            }
+                            break
+                        }
+                    }
                 }
-                mapView.removeAnnotation(view.annotation!)
+                
+                if isDeleted {
+                    appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
+                    CoreDataStackManager.sharedInstance().saveContext()
+                    mapView.removeAnnotation(view.annotation!)
+                }
             } else {
                 // Add here the redirection to the next view.
                 if let _ = appDelegate.pins {
@@ -241,6 +275,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Edit button that change to done and vice versa
     //
     @IBAction func editBtn(sender: AnyObject) {
+        callFecthedResultsController()
         if (!editingPins) {
             editingPins = true
             navigationItem.rightBarButtonItem?.title = "Done"
