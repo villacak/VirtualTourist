@@ -27,28 +27,17 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     let reusableId: String = "pinInfo"
     var editingPins: Bool = false
     
+    // Get the file path
     var filePath : String {
         let manager = NSFileManager.defaultManager()
         let url = manager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first! as NSURL
         return url.URLByAppendingPathComponent("mapRegionArchive").path!
     }
     
+    // Create the shared context
     var sharedContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance().managedObjectContext
     }
-    
-    
-    lazy var fetchedResultsController: NSFetchedResultsController = {
-        let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
-        let fetchSort = NSSortDescriptor(key: Pin.Keys.ID, ascending: true)
-        fetchRequest.sortDescriptors = [fetchSort]
-        
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
-            managedObjectContext: self.sharedContext,
-            sectionNameKeyPath: nil,
-            cacheName: nil)
-        return fetchedResultsController
-    }()
     
     
     //
@@ -67,10 +56,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         longPressRecogniser.minimumPressDuration = 0.8
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
-        callFecthedResultsController()
-        fetchedResultsController.delegate = self
-        
-        
         navigationController?.setToolbarHidden(true, animated: true)
         poulatePinArray()
         checkForPins()
@@ -79,37 +64,24 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     //
-    // Call fetech results controller
-    //
-    func callFecthedResultsController() {
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            print("An error has occured")
-        }
-    }
-    
-    //
     // Populate the Pin array from the DB
     //
     func poulatePinArray() {
         if appDelegate.pins == nil || appDelegate.pins!.count == 0 {
             appDelegate.pins = [Pin]()
         }
-        if let _ = fetchedResultsController.sections {
-            do {
-                let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
-                fetchRequest.returnsObjectsAsFaults = false
-                let tempPinArray: [Pin] = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
-                if (tempPinArray.count > 0) {
-                    for result: Pin in tempPinArray {
-                        appDelegate.pins.append(result)
-                    }
+        do {
+            let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
+            fetchRequest.returnsObjectsAsFaults = false
+            let tempPinArray: [Pin] = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
+            if (tempPinArray.count > 0) {
+                for result: Pin in tempPinArray {
+                    appDelegate.pins.append(result)
                 }
-            } catch let error as NSError {
-                print("Error : \(error.localizedDescription)")
-                // Need add a popup in here
             }
+        } catch let error as NSError {
+            print("Error : \(error.localizedDescription)")
+            // Need add a popup in here
         }
     }
     
@@ -190,7 +162,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     //
-    // check everytime that
+    // Check everytime that the user tap on top of an Pin annotation, if not in edit mode, than it will redirect the
+    // to the next view, if in edit mode then delete the pin fmor view and DB
     //
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         if let _ = view.annotation {
@@ -222,7 +195,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                             do {
                                 try sharedContext.save()
                                 isDeleted = true
-                                callFecthedResultsController()
                             } catch let error as NSError {
                                 print("Error : \(error.localizedDescription)")
                                 // Need add a popup in here
@@ -275,7 +247,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Edit button that change to done and vice versa
     //
     @IBAction func editBtn(sender: AnyObject) {
-        callFecthedResultsController()
         if (!editingPins) {
             editingPins = true
             navigationItem.rightBarButtonItem?.title = "Done"
