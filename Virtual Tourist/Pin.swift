@@ -13,7 +13,7 @@ import CoreData
 class Pin: NSManagedObject {
     
     struct Keys {
-        static let Pin: String = "Pin"
+        static let PinClass: String = "Pin"
         static let ID: String = "id"
         static let latitude: String = "latitude"
         static let longitude: String = "longitude"
@@ -32,7 +32,7 @@ class Pin: NSManagedObject {
     
     
     init(photoDictionary: [String: AnyObject], context: NSManagedObjectContext) {
-        let entity =  NSEntityDescription.entityForName(Pin.Keys.Pin, inManagedObjectContext: context)!
+        let entity =  NSEntityDescription.entityForName(Keys.PinClass, inManagedObjectContext: context)!
         super.init(entity: entity,insertIntoManagedObjectContext: context)
         
         id = photoDictionary[Keys.ID] as! Int

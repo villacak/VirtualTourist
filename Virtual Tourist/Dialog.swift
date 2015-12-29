@@ -20,4 +20,13 @@ class Dialog: NSObject {
         alert.addAction(okDismiss)
         controller.presentViewController(alert, animated: true, completion: {})
     }
+    
+    
+    //
+    // Just display an alert, telling the search was empty
+    //
+    func noResultsAlert(controller: UIViewController) {
+        okDismissAlert(titleStr: "Empty Result", messageStr: "The search didn't return any results", controller: controller)
+    }
+    
 }

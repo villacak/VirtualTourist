@@ -14,7 +14,7 @@ import CoreData
 class Photo: NSManagedObject {
     
     struct Keys {
-        static let Photo: String = "Photo"
+        static let PhotoClass: String = "Photo"
         static let photo: String = "photo"
         static let ID: String = "id"
     }
@@ -31,7 +31,7 @@ class Photo: NSManagedObject {
     
     
     init(photoDictionary: Dictionary<String, AnyObject>, context: NSManagedObjectContext) {
-        let entity =  NSEntityDescription.entityForName(Photo.Keys.Photo, inManagedObjectContext: context)!
+        let entity =  NSEntityDescription.entityForName(Keys.PhotoClass, inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
         
         if let tempObjectId = photoDictionary[Keys.ID] {

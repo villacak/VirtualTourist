@@ -62,4 +62,5 @@ class Utils: NSObject {
         annotationToReturn.coordinate.longitude = longitude
         return annotationToReturn
     }
+    
 }

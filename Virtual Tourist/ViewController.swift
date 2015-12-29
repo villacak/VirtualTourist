@@ -71,7 +71,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             appDelegate.pins = [Pin]()
         }
         do {
-            let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
+            let fetchRequest = NSFetchRequest(entityName: Pin.Keys.PinClass)
             fetchRequest.returnsObjectsAsFaults = false
             let tempPinArray: [Pin] = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
             if (tempPinArray.count > 0) {
@@ -175,7 +175,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 
                 if let _ = pinToRemove {
                     // Should have a easier way to retreive one record from DB than doing this, or retrieve from the fetchedResultsController var
-                    let fetchRequest = NSFetchRequest(entityName: Pin.Keys.Pin)
+                    let fetchRequest = NSFetchRequest(entityName: Pin.Keys.PinClass)
                     fetchRequest.returnsObjectsAsFaults = false
                     fetchRequest.predicate = NSPredicate(format: "id == %@", (pinToRemove?.id)!)
                     let sorter: NSSortDescriptor = NSSortDescriptor(key: "id" , ascending: true)
