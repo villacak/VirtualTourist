@@ -16,6 +16,7 @@ class Photo: NSManagedObject {
     struct Keys {
         static let Photo: String = "Photo"
         static let photo: String = "photo"
+        static let ID: String = "id"
     }
     
     
@@ -33,10 +34,10 @@ class Photo: NSManagedObject {
         let entity =  NSEntityDescription.entityForName(Photo.Keys.Photo, inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
         
-        if let tempObjectId = photoDictionary[VTConstants.id] {
+        if let tempObjectId = photoDictionary[Keys.ID] {
             id = tempObjectId as! Int
         }
-        if let tempObjectId = photoDictionary[VTConstants.photo] {
+        if let tempObjectId = photoDictionary[Keys.photo] {
             photo = tempObjectId as? UIImage
         }
     }
