@@ -28,6 +28,7 @@
 		33F6129C1C345022008DCB50 /* VirtualTouristDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */; };
 		33F6129E1C34510A008DCB50 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F6129D1C34510A008DCB50 /* Config.swift */; };
 		33F612A11C345239008DCB50 /* VirtualTouristConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F612A01C345239008DCB50 /* VirtualTouristConstants.swift */; };
+		33F612A31C346039008DCB50 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F612A21C346039008DCB50 /* ImageCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualTouristDB.swift; sourceTree = "<group>"; };
 		33F6129D1C34510A008DCB50 /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		33F612A01C345239008DCB50 /* VirtualTouristConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualTouristConstants.swift; sourceTree = "<group>"; };
+		33F612A21C346039008DCB50 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +119,7 @@
 				33A608A91C166E6300A7D744 /* Pin.swift */,
 				3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */,
 				337A90D21C32F762001C6CB3 /* PhotoComplete.swift */,
+				33F612A21C346039008DCB50 /* ImageCache.swift */,
 			);
 			name = domain;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				337A90D61C32FAA9001C6CB3 /* Requests.swift in Sources */,
 				3394F3AE1C13E5BB0019ABA7 /* CoreDataStackManager.swift in Sources */,
 				33A608AA1C166E6300A7D744 /* Pin.swift in Sources */,
+				33F612A31C346039008DCB50 /* ImageCache.swift in Sources */,
 				33F6129C1C345022008DCB50 /* VirtualTouristDB.swift in Sources */,
 				3394F3B81C151AAF0019ABA7 /* ActivityIndicatorView.swift in Sources */,
 				33F6129E1C34510A008DCB50 /* Config.swift in Sources */,
