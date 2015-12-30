@@ -84,7 +84,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let photo: Photo = photos![indexPath.row]
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PictureSecondView", forIndexPath: indexPath) as! PinCollectionViewCell
-        cell.imageViewTableCell?.image = photo.photo
+        cell.imageViewTableCell?.image = UIImage(named: photo.photo!)
         return cell
     }
     

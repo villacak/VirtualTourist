@@ -21,7 +21,7 @@ class Photo: NSManagedObject {
     
     
     @NSManaged var id: NSNumber
-    @NSManaged var photo: UIImage?
+    @NSManaged var photo: String?
     @NSManaged var position: Pin?
     
     
@@ -38,7 +38,21 @@ class Photo: NSManagedObject {
             id = tempObjectId as! Int
         }
         if let tempObjectId = photoDictionary[Keys.photo] {
-            photo = tempObjectId as? UIImage
+            photo = tempObjectId as? String
         }
     }
+    
+    
+    var posterImage: UIImage? {
+        
+        get {
+            return VirtualTouristDB.Caches.imageCache.imageWithIdentifier(photo!)
+        }
+        
+        set {
+            VirtualTouristDB.Caches.imageCache.storeImage(newValue, withIdentifier: photo!)
+        }
+    }
+    
+    
 }
