@@ -136,11 +136,9 @@ class VirtualTouristDB: NSObject {
         do {
             let parsedResult: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
             completionHandler(result: parsedResult, error: nil)
-        } catch error as NsError {
-            completionHandler(result: nil, error: error!)
-        } catch {
-            let error: NSError = NSError(domain: "<Your domain>", code: 1, userInfo: nil)
-            completionHandler(result: nil, error: error)
+        } catch  {
+            let tempError: NSError = NSError(domain: "Fail parsing JSON", code: 1, userInfo: nil)
+            completionHandler(result: nil, error: tempError)
         }
     }
     

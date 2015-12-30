@@ -25,7 +25,6 @@
 		3394F3B61C1519ED0019ABA7 /* Dialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3B51C1519ED0019ABA7 /* Dialog.swift */; };
 		3394F3B81C151AAF0019ABA7 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3B71C151AAF0019ABA7 /* ActivityIndicatorView.swift */; };
 		33A608AA1C166E6300A7D744 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A608A91C166E6300A7D744 /* Pin.swift */; };
-		33F6129A1C344F5B008DCB50 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F612991C344F5B008DCB50 /* ImageCache.swift */; };
 		33F6129C1C345022008DCB50 /* VirtualTouristDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */; };
 		33F6129E1C34510A008DCB50 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F6129D1C34510A008DCB50 /* Config.swift */; };
 		33F612A11C345239008DCB50 /* VirtualTouristConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F612A01C345239008DCB50 /* VirtualTouristConstants.swift */; };
@@ -52,7 +51,6 @@
 		3394F3B51C1519ED0019ABA7 /* Dialog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dialog.swift; sourceTree = "<group>"; };
 		3394F3B71C151AAF0019ABA7 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		33A608A91C166E6300A7D744 /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
-		33F612991C344F5B008DCB50 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualTouristDB.swift; sourceTree = "<group>"; };
 		33F6129D1C34510A008DCB50 /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		33F612A01C345239008DCB50 /* VirtualTouristConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualTouristConstants.swift; sourceTree = "<group>"; };
@@ -119,7 +117,6 @@
 				33A608A91C166E6300A7D744 /* Pin.swift */,
 				3357CED81C265B1400C577EE /* PinCollectionViewCell.swift */,
 				337A90D21C32F762001C6CB3 /* PhotoComplete.swift */,
-				33F612991C344F5B008DCB50 /* ImageCache.swift */,
 			);
 			name = domain;
 			sourceTree = "<group>";
@@ -213,7 +210,6 @@
 				33F612A11C345239008DCB50 /* VirtualTouristConstants.swift in Sources */,
 				3394F3AC1C13E4E70019ABA7 /* Photo.swift in Sources */,
 				3392039C1C13C98B0023D4C9 /* ViewController.swift in Sources */,
-				33F6129A1C344F5B008DCB50 /* ImageCache.swift in Sources */,
 				3394F3B31C1517AE0019ABA7 /* VTConstants.swift in Sources */,
 				3357CEDD1C28FA7000C577EE /* Utils.swift in Sources */,
 				339203A21C13C98B0023D4C9 /* Virtual_Tourist.xcdatamodeld in Sources */,
