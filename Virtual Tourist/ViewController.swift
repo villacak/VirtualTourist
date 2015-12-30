@@ -168,27 +168,28 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         if let _ = view.annotation {
             // Delete or redirect to the next view
+
             if (editingPins == true) {
                 var isDeleted: Bool = false
                 let util: Utils = Utils()
                 let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins as [Pin], pinToRemove: view.annotation!)!
                 
+                // Should have a easier way to retreive one record from DB than doing this, or retrieve from the fetchedResultsController var
+                let fetchRequest = NSFetchRequest(entityName: Pin.Keys.PinClass)
+                fetchRequest.returnsObjectsAsFaults = false
+                fetchRequest.predicate = NSPredicate(format: "id == %@", (pinToRemove?.id)!)
+                let sorter: NSSortDescriptor = NSSortDescriptor(key: "id" , ascending: true)
+                fetchRequest.sortDescriptors = [sorter]
+                
+                var result: [Pin]?
+                do {
+                    result = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
+                } catch let error as NSError{
+                    print("Error: \(error.localizedDescription)")
+                    result = nil
+                }
+
                 if let _ = pinToRemove {
-                    // Should have a easier way to retreive one record from DB than doing this, or retrieve from the fetchedResultsController var
-                    let fetchRequest = NSFetchRequest(entityName: Pin.Keys.PinClass)
-                    fetchRequest.returnsObjectsAsFaults = false
-                    fetchRequest.predicate = NSPredicate(format: "id == %@", (pinToRemove?.id)!)
-                    let sorter: NSSortDescriptor = NSSortDescriptor(key: "id" , ascending: true)
-                    fetchRequest.sortDescriptors = [sorter]
-                    
-                    var result: [Pin]?
-                    do {
-                        result = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
-                    } catch let error as NSError{
-                        print("Error: \(error.localizedDescription)")
-                        result = nil
-                    }
-                    
                     for resultItem: Pin in result! {
                         if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
                             sharedContext.deleteObject(resultItem)
