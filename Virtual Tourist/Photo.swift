@@ -44,7 +44,6 @@ class Photo: NSManagedObject {
     
     
     var posterImage: UIImage? {
-        
         get {
             return VirtualTouristDB.Caches.imageCache.imageWithIdentifier(photo!)
         }
