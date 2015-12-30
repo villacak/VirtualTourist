@@ -20,6 +20,10 @@ extension VirtualTouristDB {
         static let ConfigProfileSizes = "profile_sizes"
     }
     
+    struct Resources {
+        static let Config = "configuration"
+    }
+    
     struct Values {
         static let KevinBaconIDValue = 4724
     }    

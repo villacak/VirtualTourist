@@ -17,7 +17,7 @@ class ImageCache {
     // MARK: - Retreiving images
     
     func imageWithIdentifier(identifier: String?) -> UIImage? {
-        if identifier == nil || identifier! == "" {
+        if identifier == nil || identifier! == VTConstants.EMPTY_STRING {
             return nil
         }
         let path = pathForIdentifier(identifier!)

@@ -91,11 +91,8 @@ class VirtualTouristDB: NSObject {
     // MARK: - Update Config
     
     func taskForUpdatingConfig(completionHandler: (didSucceed: Bool, error: NSError?) -> Void) -> NSURLSessionTask {
-        
-        var parameters = [String: AnyObject]()
-        
+        let parameters = [String: AnyObject]()
         let task = taskForResource(Resources.Config, parameters: parameters) { JSONResult, error in
-            
             if let error = error {
                 completionHandler(didSucceed: false, error: error)
             } else if let newConfig = Config(dictionary: JSONResult as! [String : AnyObject]) {
@@ -118,16 +115,18 @@ class VirtualTouristDB: NSObject {
     // Try to make a better error, based on the status_message from TheMovieDB. If we cant then return the previous error
     
     class func errorForData(data: NSData?, response: NSURLResponse?, error: NSError) -> NSError {
+        var errorToReturn: NSError?
         do {
             if let parsedResult = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject] {
                 if let errorMessage = parsedResult[VirtualTouristDB.Keys.ErrorStatusMessage] as? String {
                     let userInfo = [NSLocalizedDescriptionKey : errorMessage]
-                    return NSError(domain: "VT Error", code: 1, userInfo: userInfo)
+                    errorToReturn = NSError(domain: "VT Error", code: 1, userInfo: userInfo)
                 }
             }
         } catch let error as NSError {
-            return error
+            errorToReturn = error
         }
+        return errorToReturn!
     }
     
     // Parsing the JSON
@@ -142,11 +141,10 @@ class VirtualTouristDB: NSObject {
         }
     }
     
-    // URL Encoding a dictionary into a parameter string
     
+    // URL Encoding a dictionary into a parameter string
     class func escapedParameters(parameters: [String : AnyObject]) -> String {
         var urlVars = [String]()
-        
         for (key, value) in parameters {
             // Make sure that it is a string value
             let stringValue = "\(value)"
@@ -155,7 +153,7 @@ class VirtualTouristDB: NSObject {
             // Append it
             urlVars += [key + "=" + "\(escapedValue!)"]
         }
-        return (!urlVars.isEmpty ? "?" : "") + join("&", urlVars)
+        return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
     }
     
     
