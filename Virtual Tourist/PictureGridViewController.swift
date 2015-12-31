@@ -20,6 +20,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     var appDelegate: AppDelegate!
     var photos: [Photo]?
+    var photosNumberBelongingToThePin: Int = 0
 
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
@@ -31,17 +32,22 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
         
+        picturesGridCol.delegate = self
+        picturesGridCol.dataSource = self
+
+        
         let backButton: UIBarButtonItem = UIBarButtonItem()
         backButton.title = "OK"
         navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
         
-        
         if let tempPhotos = appDelegate.pinSelected!.photos {
             photos = tempPhotos
+            photosNumberBelongingToThePin = photos!.count
             picturesGridCol.hidden = false
             noImageLbl.hidden = true
             newCollectionBtn.enabled = false
         } else {
+            photos = [Photo]()
             picturesGridCol.hidden = true
             noImageLbl.hidden = false
             newCollectionBtn.enabled = true
@@ -50,7 +56,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let latString: String = String((appDelegate.pinSelected?.latitude)!)
         let lonString: String = String((appDelegate.pinSelected?.longitude)!)
         let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
-        makeRESTCallAndGetResponse(urlToCallTemp, controller: self, contextManaged: sharedContext)
+        makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin , controller: self, contextManaged: sharedContext)
     }
     
     
@@ -92,20 +98,18 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Function to call the service and populate data when response return
     //
-    func makeRESTCallAndGetResponse(urlToCall: String, controller: UIViewController, contextManaged: NSManagedObjectContext) {
+    func makeRESTCallAndGetResponse(urlToCall: String, numberOfPics: Int!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
         let helperObject: Requests = Requests()
         // Change to false the line bellow and enable the second line to have option to select a picture
         // instead random
 //        let isRandom: Bool = false
-        helperObject.requestSearch(urlToCall: urlToCall, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
+        helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let photoResultTemp = result {
                 self.photos = photoResultTemp as? [Photo]
-//                if let _ = tempPhotoArray {
-//                    for tempPhoto: Photo in tempPhotoArray! {
-//                        tempPhotoArray?.append(tempPhoto)
-//                    }
+//                for tempPhoto: Photo in self.photos! {
+//                    self.appDelegate.pinSelected?.photos?.append(tempPhoto)
 //                }
-//                //                return tempPhotoArray!
+                self.picturesGridCol.reloadData()
             } else {
                 Dialog().noResultsAlert(controller)
             }

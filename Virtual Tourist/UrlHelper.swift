@@ -81,31 +81,4 @@ class UrlHelper: NSObject { //, NSURLConnectionDelegate {
         let urlToReturn: String = "https://farm\(item.farm!).staticflickr.com/\(item.server!)/\(item.id!)_\(item.secret!).jpg"
         return urlToReturn
     }
-    
-    
-//    //
-//    // Function to call the service and populate data when response return
-//    //
-//    func makeRESTCallAndGetResponse(urlToCall: String, controller: UIViewController, contextManaged: NSManagedObjectContext) -> [Photo] {
-//        let helperObject: Requests = Requests()
-//        var tempPhotoArray: [Photo]?
-//        // Change to false the line bellow and enable the second line to have option to select a picture
-//        // instead random
-//        isRandom = false
-//        helperObject.requestSearch(urlToCall: urlToCall, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
-//            if let photoResultTemp = result {
-//                tempPhotoArray = photoResultTemp as? [Photo]
-//                if let _ = tempPhotoArray {
-//                    for tempPhoto: Photo in tempPhotoArray! {
-//                        tempPhotoArray?.append(tempPhoto)
-//                    }
-//                }
-////                return tempPhotoArray!
-//            } else {
-//                Dialog().noResultsAlert(controller)
-//            }
-//        })
-//        return [Photo]()
-//    }
-
  }
