@@ -21,6 +21,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var appDelegate: AppDelegate!
     var photos: [Photo]?
     var photosNumberBelongingToThePin: Int = 0
+    
+    var inMemoryCache = NSCache()
 
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
@@ -97,10 +99,9 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
         cell.labelCell?.text = "\(photo.id)"
-        cell.imageViewTableCell?.image = UIImage(named: photo.photo!)
+        cell.imageViewTableCell?.image = photo.posterImage
         cell.imageViewTableCell?.layer.borderWidth = 1.0
         cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
-        
         return cell
     }
     
@@ -116,9 +117,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let photoResultTemp = result {
                 self.photos = photoResultTemp as? [Photo]
-//                for tempPhoto: Photo in self.photos! {
-//                    self.appDelegate.pinSelected?.photos?.append(tempPhoto)
-//                }
                 self.picturesGridCol.reloadData()
                 self.picturesGridCol.hidden = false
 //                self.noImageLbl.hidden = true
