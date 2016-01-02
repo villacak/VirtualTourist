@@ -10,11 +10,11 @@ import UIKit
 import MapKit
 import CoreData
 
-class PictureGridViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, MKMapViewDelegate, CLLocationManagerDelegate {
+class PictureGridViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
     
     
     @IBOutlet weak var picturesGridCol: UICollectionView!
-    @IBOutlet weak var noImageLbl: UILabel!
+//    @IBOutlet weak var noImageLbl: UILabel!
     @IBOutlet weak var newCollectionBtn: UIButton!
     @IBOutlet weak var vtMapView: MKMapView!
     
@@ -31,10 +31,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         super.viewDidLoad()
         
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-        
+
         picturesGridCol.delegate = self
         picturesGridCol.dataSource = self
-
+        picturesGridCol.backgroundView = UIView()
         
         let backButton: UIBarButtonItem = UIBarButtonItem()
         backButton.title = "OK"
@@ -44,18 +44,23 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             photos = tempPhotos
             photosNumberBelongingToThePin = photos!.count
             picturesGridCol.hidden = false
-            noImageLbl.hidden = true
+//            noImageLbl.hidden = true
             newCollectionBtn.enabled = false
         } else {
             photos = [Photo]()
+            picturesGridCol.hidden = false
+//            noImageLbl.hidden = true
             picturesGridCol.hidden = true
-            noImageLbl.hidden = false
+//            noImageLbl.hidden = false
             newCollectionBtn.enabled = true
         }
 
+        picturesGridCol.hidden = false
+        
         let latString: String = String((appDelegate.pinSelected?.latitude)!)
         let lonString: String = String((appDelegate.pinSelected?.longitude)!)
         let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
+        
         makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin , controller: self, contextManaged: sharedContext)
     }
     
@@ -87,10 +92,15 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let reusedIdentifier = "PictureSecondView"
         let photo: Photo = photos![indexPath.row]
         
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PictureSecondView", forIndexPath: indexPath) as! PinCollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
+        cell.labelCell?.text = "\(photo.id)"
         cell.imageViewTableCell?.image = UIImage(named: photo.photo!)
+        cell.imageViewTableCell?.layer.borderWidth = 1.0
+        cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
+        
         return cell
     }
     
@@ -110,6 +120,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
 //                    self.appDelegate.pinSelected?.photos?.append(tempPhoto)
 //                }
                 self.picturesGridCol.reloadData()
+                self.picturesGridCol.hidden = false
+//                self.noImageLbl.hidden = true
             } else {
                 Dialog().noResultsAlert(controller)
             }
