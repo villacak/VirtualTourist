@@ -72,6 +72,9 @@
                                     <constraint firstAttribute="height" constant="46" id="1bN-yE-1bC"/>
                                 </constraints>
                                 <state key="normal" title="New Collection"/>
+                                <connections>
+                                    <action selector="newCollectionBtn:" destination="WPa-wj-LaM" eventType="touchUpInside" id="P0P-ia-IR6"/>
+                                </connections>
                             </button>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="z5r-WP-ctX">
                                 <rect key="frame" x="0.0" y="241" width="600" height="316"/>

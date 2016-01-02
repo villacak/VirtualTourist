@@ -28,6 +28,9 @@ class VTConstants: NSObject {
     // Empty String
     static let EMPTY_STRING: String = ""
     
+    // Messages strings
+    static let LOADING: String = "Loading..."
+    
     // Keys used in the URL params
     static let METHOD_DIC_KEY: String = "method"
     static let API_DIC_KEY: String = "api_key"

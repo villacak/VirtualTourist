@@ -23,6 +23,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var photosNumberBelongingToThePin: Int = 0
     
     var inMemoryCache = NSCache()
+    var spinner: ActivityIndicatorView!
 
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
@@ -56,14 +57,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
 //            noImageLbl.hidden = false
             newCollectionBtn.enabled = true
         }
-
-        picturesGridCol.hidden = false
         
-        let latString: String = String((appDelegate.pinSelected?.latitude)!)
-        let lonString: String = String((appDelegate.pinSelected?.longitude)!)
-        let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
-        
-        makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin , controller: self, contextManaged: sharedContext)
     }
     
     
@@ -116,15 +110,44 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
 //        let isRandom: Bool = false
         helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let photoResultTemp = result {
-                self.photos = photoResultTemp as? [Photo]
-                self.picturesGridCol.reloadData()
+                let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
+                if let _ = tempPhotos {
+                    for tempPhoto: Photo in tempPhotos! {
+                        self.photos?.append(tempPhoto)
+                    }
+                }
                 self.picturesGridCol.hidden = false
 //                self.noImageLbl.hidden = true
+//                let updateRelationShip
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.newCollectionBtn.enabled = true
+                    self.picturesGridCol.reloadData()
+                    self.spinner.hide()
+                }
+
             } else {
-                Dialog().noResultsAlert(controller)
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.newCollectionBtn.enabled = true
+                    self.spinner.hide()
+                    Dialog().noResultsAlert(controller)
+                }
             }
+            
         })
     }
 
 
+    @IBAction func newCollectionBtn(sender: AnyObject) {
+        newCollectionBtn.enabled = false
+        spinner = ActivityIndicatorView(text: VTConstants.LOADING)
+        view.addSubview(spinner)
+        
+        let latString: String = String((appDelegate.pinSelected?.latitude)!)
+        let lonString: String = String((appDelegate.pinSelected?.longitude)!)
+        let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
+        photosNumberBelongingToThePin = photos!.count
+        
+        makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin , controller: self, contextManaged: sharedContext)
+    }
+    
 }

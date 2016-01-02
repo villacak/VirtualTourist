@@ -15,6 +15,7 @@ class Requests: NSObject {
     // Set to 11 as it starts from zero, so this give me 12 pics!
     let photoBatchSize: Int = 11
     
+    
     //
     // Make the request for search by latitude and longitude
     //
