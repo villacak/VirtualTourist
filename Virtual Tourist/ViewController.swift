@@ -198,6 +198,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 if let _ = pinToRemove {
                     for resultItem: Pin in result! {
                         if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
+                            removeCachedImages(resultItem.photos!)
                             sharedContext.deleteObject(resultItem)
                             do {
                                 try sharedContext.save()
@@ -283,6 +284,18 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             
             let savedRegion = MKCoordinateRegion(center: center, span: span)
             vtMapView.setRegion(savedRegion, animated: animated)
+        }
+    }
+    
+    
+    //
+    //
+    //
+    func removeCachedImages(cachedImagesToRemove: NSSet) {
+        let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
+        for tempPhoto: Photo in tempPhotos {
+            let fileName: String = tempPhoto.photo!
+            // still need to add the remove file.
         }
     }
 }
