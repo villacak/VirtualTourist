@@ -57,6 +57,16 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
         navigationController?.setToolbarHidden(true, animated: true)
+    }
+    
+    
+    //
+    // Called after viewDidLoad and just before view appear
+    //
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillDisappear(true)
+        // Need add those ones here to have updated data in memory.
+//        appDelegate.pins = [Pin]()
         poulatePinArray()
         checkForPins()
         restoreMapRegion(false)
@@ -79,8 +89,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     appDelegate.pins.append(result)
                 }
             }
-//            print("Number of photos in this pin : \(appDelegate.pins[0].photos?.count)")
-            
         } catch let error as NSError {
             print("Error : \(error.localizedDescription)")
             // Need add a popup in here
@@ -101,7 +109,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             }
         }
     }
-    
     
     
     //
@@ -154,13 +161,13 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
             dequeuedView.annotation = annotation
             view = dequeuedView
+            view.animatesDrop = true
         } else {
             view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reusableId)
+            view.animatesDrop = false
         }
-        view.animatesDrop = true
         return view
     }
-    
     
     
     //

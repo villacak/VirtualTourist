@@ -19,7 +19,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     @IBOutlet weak var vtMapView: MKMapView!
     
     var appDelegate: AppDelegate!
-    var photosSet: NSSet?
     var photos: [Photo]?
     var photosNumberBelongingToThePin: Int = 0
     
@@ -31,6 +30,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         return CoreDataStackManager.sharedInstance().managedObjectContext
     }
     
+    
+    //
+    // Called when view will appear
+    //
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -52,15 +55,16 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         } else {
             photos = [Photo]()
             picturesGridCol.hidden = false
-            //            noImageLbl.hidden = true
             picturesGridCol.hidden = true
             //            noImageLbl.hidden = false
         }
         newCollectionBtn.enabled = true
-        
     }
     
     
+    //
+    // Called just after viewDidLoad and just before the view appear
+    //
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(true)
         
@@ -79,17 +83,31 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     }
     
     
+    //
+    // Called just before the view disappear
+    //
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(true)
+        photos = nil
+        appDelegate.pinSelected = nil
+    }
     
     
     
+    
+    //
+    // Return the count value that has the amount of items within the array
+    //
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return photos!.count
     }
     
     
+    //
+    // Loop through each item to display it
+    //
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
-        print("Row \(indexPath.row) - Object : \(photos![indexPath.row])")
         let photo: Photo = photos![indexPath.row]
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
@@ -108,7 +126,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let helperObject: Requests = Requests()
         // Change to false the line bellow and enable the second line to have option to select a picture
         // instead random
-        //        let isRandom: Bool = false
         helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let photoResultTemp = result {
                 let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
