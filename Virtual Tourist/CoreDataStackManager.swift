@@ -2,7 +2,8 @@
 //  CoreDataStackManager.swift
 //  Virtual Tourist
 //
-//  Created by Klaus Villaca on 12/5/15.
+//  Copied from Udacity ios_persistence project by Klaus Villaca on 12/5/15.
+//
 //  Copyright © 2015 Klaus Villaca. All rights reserved.
 //
 

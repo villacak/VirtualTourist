@@ -50,8 +50,9 @@ class Requests: NSObject {
         
     }
     
-    
+    //
     // Return the PhotoResult populated
+    //
     func requestPhoto(photos: AnyObject, itemsCount: Int!, numberOfPics: Int!, pin: Pin!, contextManaged: NSManagedObjectContext, completionHandler:(result: [Photo]?, error: String?)-> Void) {
         let jsonPhotos: [String : AnyObject] = photos["photos"] as! [String : AnyObject]
         let arrayDictionaryPhoto: [[String : AnyObject]] = jsonPhotos["photo"] as! [[String : AnyObject]]

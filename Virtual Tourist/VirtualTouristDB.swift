@@ -21,8 +21,9 @@ class VirtualTouristDB: NSObject {
         super.init()
     }
     
-    
+    //
     // MARK: - All purpose task method for data
+    //
     func taskForResource(resource: String, parameters: [String : AnyObject], completionHandler: CompletionHander) -> NSURLSessionDataTask {
         var mutableParameters = parameters
         var mutableResource = resource
@@ -54,12 +55,12 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    //
     // MARK: - All purpose task method for images
+    //
     func taskForImageWithSize(size: String, filePath: String, completionHandler: (imageData: NSData?, error: NSError?) ->  Void) -> NSURLSessionTask {
-//        let urlComponents = [size, filePath]
         let baseURL = NSURL(string: config.baseImageURLString)!
         let url = baseURL.URLByAppendingPathComponent(size).URLByAppendingPathComponent(filePath)
-        
         print(url)
         
         let request = NSURLRequest(URL: url)
@@ -76,7 +77,9 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    //
     // MARK: - Update Config
+    //
     func taskForUpdatingConfig(completionHandler: (didSucceed: Bool, error: NSError?) -> Void) -> NSURLSessionTask {
         let parameters = [String: AnyObject]()
         let task = taskForResource(Resources.Config, parameters: parameters) { JSONResult, error in
@@ -94,10 +97,12 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    
     // MARK: - Helpers
     
-    
+    //
     // Try to make a better error, based on the status_message. If we cant then return the previous error
+    //
     class func errorForData(data: NSData?, response: NSURLResponse?, error: NSError) -> NSError {
         var errorToReturn: NSError?
         do {
@@ -114,7 +119,9 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    //
     // Parsing the JSON
+    //
     class func parseJSONWithCompletionHandler(data: NSData, completionHandler: CompletionHander) {
         do {
             let parsedResult: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
@@ -126,7 +133,9 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    //
     // URL Encoding a dictionary into a parameter string
+    //
     class func escapedParameters(parameters: [String : AnyObject]) -> String {
         var urlVars = [String]()
         for (key, value) in parameters {
@@ -138,7 +147,9 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    //
     // MARK: - Shared Instance
+    //
     class func sharedInstance() -> VirtualTouristDB {
         struct Singleton {
             static var sharedInstance = VirtualTouristDB()
@@ -146,8 +157,9 @@ class VirtualTouristDB: NSObject {
         return Singleton.sharedInstance
     }
     
-    
+    //
     // MARK: - Shared Date Formatter
+    //
     class var sharedDateFormatter: NSDateFormatter  {
         struct Singleton {
             static let dateFormatter = Singleton.generateDateFormatter()
@@ -161,7 +173,9 @@ class VirtualTouristDB: NSObject {
     }
     
     
+    //
     // MARK: - Shared Image Cache
+    //
     struct Caches {
         static let imageCache = ImageCache()
     }
