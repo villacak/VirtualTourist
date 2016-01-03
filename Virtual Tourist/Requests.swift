@@ -33,7 +33,7 @@ class Requests: NSObject {
                         if let _ = result {
                             completionHandler(result: result, error: nil)
                         } else {
-                            completionHandler(result: nil, error: nil)
+                            completionHandler(result: nil, error: error)
                         }
                     })
                 } catch let error as NSError {

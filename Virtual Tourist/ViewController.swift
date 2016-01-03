@@ -57,16 +57,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
         navigationController?.setToolbarHidden(true, animated: true)
-    }
-    
-    
-    //
-    // Called after viewDidLoad and just before view appear
-    //
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillDisappear(true)
-        // Need add those ones here to have updated data in memory.
-//        appDelegate.pins = [Pin]()
+
         poulatePinArray()
         checkForPins()
         restoreMapRegion(false)
@@ -89,9 +80,14 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     appDelegate.pins.append(result)
                 }
             }
+            
+            // This message is intented to be displayed if there is none or zero pin.
+            if appDelegate.pins.count == 0 {
+                Dialog().okDismissAlert(titleStr: VTConstants.ADD_PIN, messageStr: VTConstants.ADD_PIN_MESSAGE, controller: self)
+            }
         } catch let error as NSError {
+            Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
             print("Error : \(error.localizedDescription)")
-            // Need add a popup in here
         }
     }
     
@@ -161,10 +157,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
             dequeuedView.annotation = annotation
             view = dequeuedView
-            view.animatesDrop = true
+            view.animatesDrop = false
         } else {
             view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reusableId)
-            view.animatesDrop = false
+            view.animatesDrop = true
         }
         return view
     }
@@ -194,6 +190,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 do {
                     result = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
                 } catch let error as NSError{
+                    Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
                     print("Error: \(error.localizedDescription)")
                     result = nil
                 }
@@ -206,8 +203,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                                 try sharedContext.save()
                                 isDeleted = true
                             } catch let error as NSError {
+                                Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
                                 print("Error : \(error.localizedDescription)")
-                                // Need add a popup in here
                             }
                             break
                         }

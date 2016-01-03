@@ -153,7 +153,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 dispatch_async(dispatch_get_main_queue()) {
                     self.newCollectionBtn.enabled = true
                     self.spinner.hide()
-                    Dialog().noResultsAlert(controller)
+                    Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error!, controller: controller)
                 }
             }
             

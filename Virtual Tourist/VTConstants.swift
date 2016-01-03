@@ -31,6 +31,9 @@ class VTConstants: NSObject {
     // Messages strings
     static let LOADING: String = "Loading..."
     static let NO_IMAGE: String = "No Image(s)"
+    static let ERROR: String = "Error"
+    static let ADD_PIN: String = "Adding Pin"
+    static let ADD_PIN_MESSAGE: String = "Press and hold on the desired location for 0.8 seconds to add the pin."
     
     // Keys used in the URL params
     static let METHOD_DIC_KEY: String = "method"

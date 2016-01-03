@@ -2,8 +2,8 @@
 //  Config.swift
 //  Virtual Tourist
 //
-//  Created by Klaus Villaca on 12/30/15.
-//  Copyright © 2015 Klaus Villaca. All rights reserved.
+//  Copied and adapted from other Udacity project
+//  2015 Klaus Villaca. All rights reserved.
 //
 
 import Foundation
@@ -86,8 +86,9 @@ class Config: NSObject, NSCoding {
         }
     }
     
+    //
     // MARK: - NSCoding
-    
+    //
     let BaseImageURLStringKey = "config.base_image_url_string_key"
     let SecureBaseImageURLStringKey =  "config.secure_base_image_url_key"
     let PosterSizesKey = "config.poster_size_key"
