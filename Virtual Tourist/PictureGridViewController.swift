@@ -169,27 +169,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             self.photos?.append(tempPhoto)
         }
     }
-    
-
-//    //
-//    // Create an UILabel programatically at the center of the screen
-//    //
-//    func noImagesCenteredLabel() {
-//        let fontSize: CGFloat = 26
-//        let constraintVertical: NSLayoutConstraint  = NSLayoutConstraint(item: self.view, attribute: NSLayoutAttribute.CenterY, relatedBy: NSLayoutRelation.Equal, toItem: self.view, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0.0)
-//        let constraintHorizontal: NSLayoutConstraint  = NSLayoutConstraint(item: self.view, attribute: NSLayoutAttribute.CenterX, relatedBy: NSLayoutRelation.Equal, toItem: self.view, attribute: NSLayoutAttribute.CenterX, multiplier: 1.0, constant: 0.0)
-//        noImageLbl = UILabel()
-//        print("\(VTConstants.NO_IMAGE)")
-//        noImageLbl.text = VTConstants.NO_IMAGE
-//        noImageLbl.font = UIFont(name: "System", size: fontSize)
-//        noImageLbl.font = UIFont.boldSystemFontOfSize(fontSize)
-//        noImageLbl.font = UIFont.systemFontOfSize(28)
-//        noImageLbl.textColor = UIColor.blackColor()
-//        
-//        noImageLbl.addConstraints([constraintVertical, constraintHorizontal])
-//        self.view.addSubview(noImageLbl)
-//    }
-    
+        
     
     //
     // New Collection Button
