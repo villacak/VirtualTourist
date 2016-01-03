@@ -97,7 +97,7 @@ class VirtualTouristDB: NSObject {
     // MARK: - Helpers
     
     
-    // Try to make a better error, based on the status_message from TheMovieDB. If we cant then return the previous error
+    // Try to make a better error, based on the status_message. If we cant then return the previous error
     class func errorForData(data: NSData?, response: NSURLResponse?, error: NSError) -> NSError {
         var errorToReturn: NSError?
         do {

@@ -14,17 +14,18 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     
     @IBOutlet weak var picturesGridCol: UICollectionView!
-//    @IBOutlet weak var noImageLbl: UILabel!
+    //    @IBOutlet weak var noImageLbl: UILabel!
     @IBOutlet weak var newCollectionBtn: UIButton!
     @IBOutlet weak var vtMapView: MKMapView!
     
     var appDelegate: AppDelegate!
+    var photosSet: NSSet?
     var photos: [Photo]?
     var photosNumberBelongingToThePin: Int = 0
     
     var inMemoryCache = NSCache()
     var spinner: ActivityIndicatorView!
-
+    
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
         return CoreDataStackManager.sharedInstance().managedObjectContext
@@ -34,7 +35,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         super.viewDidLoad()
         
         appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
-
+        
         picturesGridCol.delegate = self
         picturesGridCol.dataSource = self
         picturesGridCol.backgroundView = UIView()
@@ -44,19 +45,18 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
         
         if let tempPhotos = appDelegate.pinSelected!.photos {
-            photos = tempPhotos
+            photos = tempPhotos.allObjects as NSArray as? [Photo]
             photosNumberBelongingToThePin = photos!.count
             picturesGridCol.hidden = false
-//            noImageLbl.hidden = true
-            newCollectionBtn.enabled = false
+            //            noImageLbl.hidden = true
         } else {
             photos = [Photo]()
             picturesGridCol.hidden = false
-//            noImageLbl.hidden = true
+            //            noImageLbl.hidden = true
             picturesGridCol.hidden = true
-//            noImageLbl.hidden = false
-            newCollectionBtn.enabled = true
+            //            noImageLbl.hidden = false
         }
+        newCollectionBtn.enabled = true
         
     }
     
@@ -79,8 +79,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     }
     
     
-
-
+    
+    
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return photos!.count
@@ -89,6 +89,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
+        print("Row \(indexPath.row) - Object : \(photos![indexPath.row])")
         let photo: Photo = photos![indexPath.row]
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
@@ -103,28 +104,25 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Function to call the service and populate data when response return
     //
-    func makeRESTCallAndGetResponse(urlToCall: String, numberOfPics: Int!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
+    func makeRESTCallAndGetResponse(urlToCall: String, numberOfPics: Int!, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
         let helperObject: Requests = Requests()
         // Change to false the line bellow and enable the second line to have option to select a picture
         // instead random
-//        let isRandom: Bool = false
-        helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
+        //        let isRandom: Bool = false
+        helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let photoResultTemp = result {
                 let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
                 if let _ = tempPhotos {
-                    for tempPhoto: Photo in tempPhotos! {
-                        self.photos?.append(tempPhoto)
-                    }
+                    self.prepateItemToPersistAndUpdateIt(tempPhotos!)
                 }
                 self.picturesGridCol.hidden = false
-//                self.noImageLbl.hidden = true
-//                let updateRelationShip
+                //                self.noImageLbl.hidden = true
                 dispatch_async(dispatch_get_main_queue()) {
                     self.newCollectionBtn.enabled = true
                     self.picturesGridCol.reloadData()
                     self.spinner.hide()
                 }
-
+                
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
                     self.newCollectionBtn.enabled = true
@@ -135,8 +133,34 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             
         })
     }
+    
+    
+    //
+    // Update the Pin record and pin selected
+    //
+    func prepateItemToPersistAndUpdateIt(tempPhotos: [Photo]!) {
+//        let doubleLat: Double = Double((appDelegate.pinSelected?.latitude)!)
+//        let doubleLon: Double = Double((appDelegate.pinSelected?.longitude)!)
+        
+        for tempPhoto: Photo in tempPhotos! {
+            self.photos?.append(tempPhoto)
+        }
+//        let dictionary: [String: AnyObject] = [
+//            Pin.Keys.ID : appDelegate.pinSelected!.id,
+//            Pin.Keys.latitude : doubleLat,
+//            Pin.Keys.longitude : doubleLon,
+//            Pin.Keys.photos : tempPhotos
+//        ]
+//        appDelegate.pinSelected = Pin(photoDictionary: dictionary, context: sharedContext)
+//        CoreDataStackManager.sharedInstance().saveContext()
+    }
+    
 
-
+    
+    
+    //
+    // New Collection Button
+    //
     @IBAction func newCollectionBtn(sender: AnyObject) {
         newCollectionBtn.enabled = false
         spinner = ActivityIndicatorView(text: VTConstants.LOADING)
@@ -147,7 +171,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
         photosNumberBelongingToThePin = photos!.count
         
-        makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin , controller: self, contextManaged: sharedContext)
+        makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin, pin: appDelegate.pinSelected, controller: self, contextManaged: sharedContext)
     }
     
 }

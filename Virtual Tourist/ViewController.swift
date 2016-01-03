@@ -79,6 +79,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     appDelegate.pins.append(result)
                 }
             }
+//            print("Number of photos in this pin : \(appDelegate.pins[0].photos?.count)")
+            
         } catch let error as NSError {
             print("Error : \(error.localizedDescription)")
             // Need add a popup in here

@@ -19,7 +19,7 @@ class Requests: NSObject {
     //
     // Make the request for search by latitude and longitude
     //
-    func requestSearch(urlToCall urlToCall: String, numberOfPics: Int!, controller: UIViewController, contextManaged: NSManagedObjectContext, completionHandler:(result: AnyObject!, error: String?) -> Void) -> NSURLSessionDataTask  {
+    func requestSearch(urlToCall urlToCall: String, numberOfPics: Int!, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext, completionHandler:(result: AnyObject!, error: String?) -> Void) -> NSURLSessionDataTask  {
         let url: NSURL = NSURL(string: urlToCall)!
         let request: NSMutableURLRequest = NSMutableURLRequest(URL: url)
         request.HTTPMethod = VTConstants.POST_METHOD
@@ -29,7 +29,7 @@ class Requests: NSObject {
             if let data = data {
                 do {
                     let jsonResult: NSDictionary? = try NSJSONSerialization.JSONObjectWithData(data, options:NSJSONReadingOptions.MutableContainers) as? NSDictionary
-                    self.requestPhoto(jsonResult!, itemsCount: jsonResult!.count, numberOfPics: numberOfPics, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
+                    self.requestPhoto(jsonResult!, itemsCount: jsonResult!.count, numberOfPics: numberOfPics, pin: pin, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
                         if let _ = result {
                             completionHandler(result: result, error: nil)
                         } else {
@@ -52,7 +52,7 @@ class Requests: NSObject {
     
     
     // Return the PhotoResult populated
-    func requestPhoto(photos: AnyObject, itemsCount: Int!, numberOfPics: Int!, contextManaged: NSManagedObjectContext, completionHandler:(result: [Photo]?, error: String?)-> Void) {
+    func requestPhoto(photos: AnyObject, itemsCount: Int!, numberOfPics: Int!, pin: Pin!, contextManaged: NSManagedObjectContext, completionHandler:(result: [Photo]?, error: String?)-> Void) {
         let jsonPhotos: [String : AnyObject] = photos["photos"] as! [String : AnyObject]
         let arrayDictionaryPhoto: [[String : AnyObject]] = jsonPhotos["photo"] as! [[String : AnyObject]]
         
@@ -66,24 +66,24 @@ class Requests: NSObject {
                 
                 let url: NSURL = NSURL(string: urlToCall)!
                 if let imageData = NSData(contentsOfURL: url) {
-//                    dispatch_async(dispatch_get_main_queue(), {
-                        let imageTemp: UIImage? = UIImage(data: imageData)!
+                    let imageTemp: UIImage? = UIImage(data: imageData)!
+                    
+                    if let _ = imageTemp {
+                        let dictionary: [String: AnyObject] = [
+                            Photo.Keys.ID : photoIndex + 1,
+                            Photo.Keys.photo : String("\(photoObj.id!)_\(photoObj.secret!).jpg")
+                        ]
                         
-                        if let _ = imageTemp {
-                            let dictionary: [String: AnyObject] = [
-                                Photo.Keys.ID : photoIndex,
-                                Photo.Keys.photo : String("\(photoObj.id!)_\(photoObj.secret!).jpg")
-                            ]
-                            
-                            let tempPhoto: Photo = Photo(photoDictionary: dictionary, context: contextManaged)
-                            tempPhoto.posterImage = imageTemp
-                            CoreDataStackManager.sharedInstance().saveContext()
-                            
-                            photosArray.append(tempPhoto)
-                        }
-//                    })
+                        print("\(photoObj.id!)_\(photoObj.secret!).jpg")
+                        let tempPhoto: Photo = Photo(photoDictionary: dictionary, context: contextManaged)
+                        tempPhoto.position = pin
+                        tempPhoto.posterImage = imageTemp
+                        
+                        photosArray.append(tempPhoto)
+                    }
                 }
             }
+            CoreDataStackManager.sharedInstance().saveContext()
             completionHandler(result: photosArray, error: nil)
         } else {
             completionHandler(result: nil, error: "No result Found!")
