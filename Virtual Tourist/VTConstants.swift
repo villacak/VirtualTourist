@@ -30,6 +30,7 @@ class VTConstants: NSObject {
     
     // Messages strings
     static let LOADING: String = "Loading..."
+    static let NO_IMAGE: String = "No Image(s)"
     
     // Keys used in the URL params
     static let METHOD_DIC_KEY: String = "method"

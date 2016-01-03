@@ -14,10 +14,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     
     @IBOutlet weak var picturesGridCol: UICollectionView!
-    //    @IBOutlet weak var noImageLbl: UILabel!
+    @IBOutlet weak var noImageLbl: UILabel!
     @IBOutlet weak var newCollectionBtn: UIButton!
     @IBOutlet weak var vtMapView: MKMapView!
     
+//    var noImageLbl: UILabel!
     var appDelegate: AppDelegate!
     var photos: [Photo]?
     var photosNumberBelongingToThePin: Int = 0
@@ -49,18 +50,28 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         if let tempPhotos = appDelegate.pinSelected!.photos {
             photos = tempPhotos.allObjects as NSArray as? [Photo]
-            photosNumberBelongingToThePin = photos!.count
-            picturesGridCol.hidden = false
-            //            noImageLbl.hidden = true
+            if photos?.count > 0 {
+                photosNumberBelongingToThePin = photos!.count
+                picturesGridCol.hidden = false
+                noImageLbl.hidden = true
+            } else {
+                defaultSettingsForEmptyArray()
+            }
         } else {
             photos = [Photo]()
-            picturesGridCol.hidden = false
-            picturesGridCol.hidden = true
-            //            noImageLbl.hidden = false
+            defaultSettingsForEmptyArray()
         }
         newCollectionBtn.enabled = true
     }
     
+    
+    //
+    // Just a function to don't have neat and clean code
+    //
+    func defaultSettingsForEmptyArray() {
+        picturesGridCol.hidden = true
+        noImageLbl.hidden = false
+    }
     
     //
     // Called just after viewDidLoad and just before the view appear
@@ -91,8 +102,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         photos = nil
         appDelegate.pinSelected = nil
     }
-    
-    
     
     
     //
@@ -133,7 +142,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     self.prepateItemToPersistAndUpdateIt(tempPhotos!)
                 }
                 self.picturesGridCol.hidden = false
-                //                self.noImageLbl.hidden = true
+                self.noImageLbl.hidden = true
                 dispatch_async(dispatch_get_main_queue()) {
                     self.newCollectionBtn.enabled = true
                     self.picturesGridCol.reloadData()
@@ -156,23 +165,30 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Update the Pin record and pin selected
     //
     func prepateItemToPersistAndUpdateIt(tempPhotos: [Photo]!) {
-//        let doubleLat: Double = Double((appDelegate.pinSelected?.latitude)!)
-//        let doubleLon: Double = Double((appDelegate.pinSelected?.longitude)!)
-        
         for tempPhoto: Photo in tempPhotos! {
             self.photos?.append(tempPhoto)
         }
-//        let dictionary: [String: AnyObject] = [
-//            Pin.Keys.ID : appDelegate.pinSelected!.id,
-//            Pin.Keys.latitude : doubleLat,
-//            Pin.Keys.longitude : doubleLon,
-//            Pin.Keys.photos : tempPhotos
-//        ]
-//        appDelegate.pinSelected = Pin(photoDictionary: dictionary, context: sharedContext)
-//        CoreDataStackManager.sharedInstance().saveContext()
     }
     
 
+//    //
+//    // Create an UILabel programatically at the center of the screen
+//    //
+//    func noImagesCenteredLabel() {
+//        let fontSize: CGFloat = 26
+//        let constraintVertical: NSLayoutConstraint  = NSLayoutConstraint(item: self.view, attribute: NSLayoutAttribute.CenterY, relatedBy: NSLayoutRelation.Equal, toItem: self.view, attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0.0)
+//        let constraintHorizontal: NSLayoutConstraint  = NSLayoutConstraint(item: self.view, attribute: NSLayoutAttribute.CenterX, relatedBy: NSLayoutRelation.Equal, toItem: self.view, attribute: NSLayoutAttribute.CenterX, multiplier: 1.0, constant: 0.0)
+//        noImageLbl = UILabel()
+//        print("\(VTConstants.NO_IMAGE)")
+//        noImageLbl.text = VTConstants.NO_IMAGE
+//        noImageLbl.font = UIFont(name: "System", size: fontSize)
+//        noImageLbl.font = UIFont.boldSystemFontOfSize(fontSize)
+//        noImageLbl.font = UIFont.systemFontOfSize(28)
+//        noImageLbl.textColor = UIColor.blackColor()
+//        
+//        noImageLbl.addConstraints([constraintVertical, constraintHorizontal])
+//        self.view.addSubview(noImageLbl)
+//    }
     
     
     //
