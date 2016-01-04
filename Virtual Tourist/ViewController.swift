@@ -307,12 +307,12 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         
         do {
             try sharedContext.save()
+            CoreDataStackManager.sharedInstance().saveContext()
+            Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
         } catch let error as NSError {
             Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
         }
-        CoreDataStackManager.sharedInstance().saveContext()
         
-        Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
     }
 }
 

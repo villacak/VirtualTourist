@@ -234,7 +234,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             do {
                 sharedContext.deleteObject(tempPhoto)
                 try sharedContext.save()
-                Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
+                Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 2, controller: self)
                 CoreDataStackManager.sharedInstance().saveContext()
                 photos?.removeAtIndex(photoIndexForDelete)
                 self.picturesGridCol.reloadData()

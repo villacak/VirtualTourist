@@ -39,6 +39,7 @@ class VTConstants: NSObject {
     static let DELETE_MESSAGE: String = "To delete, just tap on top of the pin that you want to delete"
     static let DELETED_MESSAGE: String = "Pin and pictures removed"
     static let DELETE_SINGLE_PIC: String = "Do you want delete this photo?"
+    static let DELETED_SINGLE_PIC: String = "Photo has been deleted."
     
     // Keys used in the URL params
     static let METHOD_DIC_KEY: String = "method"
