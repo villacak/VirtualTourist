@@ -133,6 +133,15 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     func makeRESTCallAndGetResponse(urlToCall: String, numberOfPics: Int!, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
         let helperObject: Requests = Requests()
+        
+        // As we are just replacing those images it's needed first remove them
+        // Removing
+        for tempPhoto: Photo in photos! {
+            tempPhoto.posterImage = nil
+        }
+        CoreDataStackManager.sharedInstance().saveContext()
+        
+        
         // Change to false the line bellow and enable the second line to have option to select a picture
         // instead random
         helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in

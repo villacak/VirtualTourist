@@ -70,8 +70,10 @@ class Requests: NSObject {
                     let imageTemp: UIImage? = UIImage(data: imageData)!
                     
                     if let _ = imageTemp {
+                        let tempId: Int = (photoIndex + 1) - photoIndex
+                        print("ID : \(tempId)")
                         let dictionary: [String: AnyObject] = [
-                            Photo.Keys.ID : photoIndex + 1,
+                            Photo.Keys.ID : tempId,
                             Photo.Keys.photo : String("\(photoObj.id!)_\(photoObj.secret!).jpg")
                         ]
                         

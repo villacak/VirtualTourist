@@ -301,6 +301,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             tempPhoto.posterImage = nil
             print("Removing image name : \(tempPhoto.photo!)")
         }
+        CoreDataStackManager.sharedInstance().saveContext()
         
         Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 3, controller: self)
     }
