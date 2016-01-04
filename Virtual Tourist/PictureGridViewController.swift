@@ -21,8 +21,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
 //    var noImageLbl: UILabel!
     var appDelegate: AppDelegate!
     var photos: [Photo]?
-    var photosNumberBelongingToThePin: Int = 0
-    
+   
     var inMemoryCache = NSCache()
     var spinner: ActivityIndicatorView!
     
@@ -51,7 +50,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         if let tempPhotos = appDelegate.pinSelected!.photos {
             photos = tempPhotos.allObjects as NSArray as? [Photo]
             if photos?.count > 0 {
-                photosNumberBelongingToThePin = photos!.count
                 picturesGridCol.hidden = false
                 noImageLbl.hidden = true
             } else {
@@ -131,12 +129,16 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Function to call the service and populate data when response return
     //
-    func makeRESTCallAndGetResponse(urlToCall: String, numberOfPics: Int!, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
+    func makeRESTCallAndGetResponse(urlToCall: String, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
         let helperObject: Requests = Requests()
         
         // As we are just replacing those images it's needed first remove them
         // Removing
+        var greaterIDNumber: NSNumber = 0
         for tempPhoto: Photo in photos! {
+            if (tempPhoto.id as Int) >= (greaterIDNumber as Int) {
+                greaterIDNumber = tempPhoto.id
+            }
             tempPhoto.posterImage = nil
         }
         CoreDataStackManager.sharedInstance().saveContext()
@@ -144,7 +146,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         // Change to false the line bellow and enable the second line to have option to select a picture
         // instead random
-        helperObject.requestSearch(urlToCall: urlToCall, numberOfPics: numberOfPics, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
+        helperObject.requestSearch(urlToCall: urlToCall, pin: pin, greaterID: greaterIDNumber as Int, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let photoResultTemp = result {
                 let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
                 if let _ = tempPhotos {
@@ -191,9 +193,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let latString: String = String((appDelegate.pinSelected?.latitude)!)
         let lonString: String = String((appDelegate.pinSelected?.longitude)!)
         let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
-        photosNumberBelongingToThePin = photos!.count
         
-        makeRESTCallAndGetResponse(urlToCallTemp, numberOfPics: photosNumberBelongingToThePin, pin: appDelegate.pinSelected, controller: self, contextManaged: sharedContext)
+        makeRESTCallAndGetResponse(urlToCallTemp, pin: appDelegate.pinSelected, controller: self, contextManaged: sharedContext)
     }
     
 }

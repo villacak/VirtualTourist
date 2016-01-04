@@ -19,7 +19,7 @@ class Requests: NSObject {
     //
     // Make the request for search by latitude and longitude
     //
-    func requestSearch(urlToCall urlToCall: String, numberOfPics: Int!, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext, completionHandler:(result: AnyObject!, error: String?) -> Void) -> NSURLSessionDataTask  {
+    func requestSearch(urlToCall urlToCall: String, pin: Pin!, greaterID: Int!, controller: UIViewController, contextManaged: NSManagedObjectContext, completionHandler:(result: AnyObject!, error: String?) -> Void) -> NSURLSessionDataTask  {
         let url: NSURL = NSURL(string: urlToCall)!
         let request: NSMutableURLRequest = NSMutableURLRequest(URL: url)
         request.HTTPMethod = VTConstants.POST_METHOD
@@ -29,7 +29,7 @@ class Requests: NSObject {
             if let data = data {
                 do {
                     let jsonResult: NSDictionary? = try NSJSONSerialization.JSONObjectWithData(data, options:NSJSONReadingOptions.MutableContainers) as? NSDictionary
-                    self.requestPhoto(jsonResult!, itemsCount: jsonResult!.count, numberOfPics: numberOfPics, pin: pin, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
+                    self.requestPhoto(jsonResult!, itemsCount: jsonResult!.count, pin: pin, greaterID: greaterID , contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
                         if let _ = result {
                             completionHandler(result: result, error: nil)
                         } else {
@@ -53,15 +53,17 @@ class Requests: NSObject {
     //
     // Return the PhotoResult populated
     //
-    func requestPhoto(photos: AnyObject, itemsCount: Int!, numberOfPics: Int!, pin: Pin!, contextManaged: NSManagedObjectContext, completionHandler:(result: [Photo]?, error: String?)-> Void) {
+    // numberOfPics isn't been used at moment.
+    //
+    func requestPhoto(photos: AnyObject, itemsCount: Int!, pin: Pin!, greaterID: Int!, contextManaged: NSManagedObjectContext, completionHandler:(result: [Photo]?, error: String?)-> Void) {
         let jsonPhotos: [String : AnyObject] = photos["photos"] as! [String : AnyObject]
         let arrayDictionaryPhoto: [[String : AnyObject]] = jsonPhotos["photo"] as! [[String : AnyObject]]
         
         if (arrayDictionaryPhoto.count > 0) {
             var photosArray: [Photo] = [Photo]()
             let urlHelper: UrlHelper = UrlHelper()
-            let limitNumberOfPics: Int = numberOfPics + photoBatchSize
-            for photoIndex in numberOfPics...limitNumberOfPics {
+            let limitNumberOfPics: Int = greaterID + photoBatchSize
+            for photoIndex in greaterID...limitNumberOfPics {
                 let photoObj: PhotoComplete = urlHelper.populatePhoto(arrayDictionaryPhoto[photoIndex])
                 let urlToCall: String = urlHelper.assembleUrlToLoadImageFromSearch(photoObj)
                 
@@ -70,7 +72,7 @@ class Requests: NSObject {
                     let imageTemp: UIImage? = UIImage(data: imageData)!
                     
                     if let _ = imageTemp {
-                        let tempId: Int = (photoIndex + 1) - photoIndex
+                        let tempId: Int = photoIndex + 1
                         print("ID : \(tempId)")
                         let dictionary: [String: AnyObject] = [
                             Photo.Keys.ID : tempId,
