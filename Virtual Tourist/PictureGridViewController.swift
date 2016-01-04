@@ -156,7 +156,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             if let photoResultTemp = result {
                 let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
                 if let _ = tempPhotos {
-                    self.prepateItemToPersistAndUpdateIt(tempPhotos!)
+                    self.photos = tempPhotos
+//                    self.prepateItemToPersistAndUpdateIt(tempPhotos!)
                 }
                 self.picturesGridCol.hidden = false
                 self.noImageLbl.hidden = true
@@ -181,12 +182,12 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Update the Pin record and pin selected
     //
-    func prepateItemToPersistAndUpdateIt(tempPhotos: [Photo]!) {
-        for tempPhoto: Photo in tempPhotos! {
-            self.photos?.append(tempPhoto)
-        }
-    }
-        
+//    func prepateItemToPersistAndUpdateIt(tempPhotos: [Photo]!) {
+//        for tempPhoto: Photo in tempPhotos! {
+//            self.photos?.append(tempPhoto)
+//        }
+//    }
+    
     
     //
     // New Collection Button
