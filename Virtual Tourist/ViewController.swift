@@ -228,6 +228,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     appDelegate.pinSelected = utils.retrievePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     if let _ = appDelegate.pinSelected {
                         performSegueWithIdentifier("callPicGrid", sender: self)
+                        vtMapView.deselectAnnotation(view.annotation, animated: false)
                     }
                 }
             }
