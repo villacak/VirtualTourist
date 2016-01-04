@@ -295,7 +295,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
         for tempPhoto: Photo in tempPhotos {
             tempPhoto.posterImage = nil
-            print("Removing image name : \(tempPhoto.photo!)")
         }
     }
 }
