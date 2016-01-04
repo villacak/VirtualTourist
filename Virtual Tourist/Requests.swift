@@ -59,6 +59,8 @@ class Requests: NSObject {
         let jsonPhotos: [String : AnyObject] = photos["photos"] as! [String : AnyObject]
         let arrayDictionaryPhoto: [[String : AnyObject]] = jsonPhotos["photo"] as! [[String : AnyObject]]
         
+        
+        print("Greater ID: \(greaterID)")
         if (arrayDictionaryPhoto.count > 0) {
             var photosArray: [Photo] = [Photo]()
             let urlHelper: UrlHelper = UrlHelper()
@@ -73,7 +75,7 @@ class Requests: NSObject {
                     
                     if let _ = imageTemp {
                         let tempId: Int = photoIndex + 1
-                        print("ID : \(tempId)")
+                        print("--- ID : \(tempId)")
                         let dictionary: [String: AnyObject] = [
                             Photo.Keys.ID : tempId,
                             Photo.Keys.photo : String("\(photoObj.id!)_\(photoObj.secret!).jpg")

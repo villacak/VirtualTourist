@@ -111,10 +111,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Handle the tap touch
     //
     func handleLongTouch(getstureRecognizer : UIGestureRecognizer) {
-        if getstureRecognizer.state == UIGestureRecognizerState.Began { return }
         
         //  If editing map, mean tapped on the edit navigation buttom
         if (editingPins == false) {
+            if getstureRecognizer.state == UIGestureRecognizerState.Began { return }
             let touchPoint = getstureRecognizer.locationInView(self.vtMapView)
             let touchMapCoordinate: CLLocationCoordinate2D = vtMapView.convertPoint(touchPoint, toCoordinateFromView: vtMapView)
             let annotation = MKPointAnnotation()
@@ -257,7 +257,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     @IBAction func editBtn(sender: AnyObject) {
         if (!editingPins) {
             if !appDelegate.hasDeleteShownThisAppRun {
-                Dialog().okDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETE_MESSAGE, controller: self)
+//                Dialog().okDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETE_MESSAGE, controller: vtMapView)
                 appDelegate.hasDeleteShownThisAppRun = true
                 vtMapView.setNeedsFocusUpdate()
             }
@@ -301,10 +301,17 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
         for tempPhoto: Photo in tempPhotos {
             tempPhoto.posterImage = nil
+            sharedContext.deleteObject(tempPhoto)
+        }
+        
+        do {
+            try sharedContext.save()
+        } catch let error as NSError {
+            Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
         }
         CoreDataStackManager.sharedInstance().saveContext()
         
-        Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 3, controller: self)
+        Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
     }
 }
 
