@@ -28,12 +28,16 @@ class VTConstants: NSObject {
     // Empty String
     static let EMPTY_STRING: String = ""
     
+    
     // Messages strings
+    static let DELETE:String = "Delete"
     static let LOADING: String = "Loading..."
     static let NO_IMAGE: String = "No Image(s)"
     static let ERROR: String = "Error"
     static let ADD_PIN: String = "Adding Pin"
     static let ADD_PIN_MESSAGE: String = "Press and hold on the desired location for 0.8 seconds to add the pin."
+    static let DELETE_MESSAGE: String = "To delete, just tap on top of the pin that you want to delete"
+    static let DELETED_MESSAGE: String = "Pin and pictures removed"
     
     // Keys used in the URL params
     static let METHOD_DIC_KEY: String = "method"

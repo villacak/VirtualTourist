@@ -57,7 +57,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
         navigationController?.setToolbarHidden(true, animated: true)
-
+        
         poulatePinArray()
         checkForPins()
         restoreMapRegion(false)
@@ -173,7 +173,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         if let _ = view.annotation {
             // Delete or redirect to the next view
-
+            
             if (editingPins == true) {
                 var isDeleted: Bool = false
                 let util: Utils = Utils()
@@ -194,7 +194,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     print("Error: \(error.localizedDescription)")
                     result = nil
                 }
-
+                
                 if let _ = pinToRemove {
                     for resultItem: Pin in result! {
                         if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
@@ -256,6 +256,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     @IBAction func editBtn(sender: AnyObject) {
         if (!editingPins) {
+            if !appDelegate.hasDeleteShownThisAppRun {
+                Dialog().okDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETE_MESSAGE, controller: self)
+                appDelegate.hasDeleteShownThisAppRun = true
+            }
             editingPins = true
             navigationItem.rightBarButtonItem?.title = "Done"
             navigationController?.setToolbarHidden(false, animated: true)
@@ -297,6 +301,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             tempPhoto.posterImage = nil
             print("Removing image name : \(tempPhoto.photo!)")
         }
+        
+        Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 3, controller: self)
     }
 }
 
