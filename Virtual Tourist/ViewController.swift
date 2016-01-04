@@ -171,9 +171,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // to the next view, if in edit mode then delete the pin fmor view and DB
     //
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        if let _ = view.annotation {
+        
+        if let _ = view.annotation { 
             // Delete or redirect to the next view
-            
             if (editingPins == true) {
                 var isDeleted: Bool = false
                 let util: Utils = Utils()
@@ -259,6 +259,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             if !appDelegate.hasDeleteShownThisAppRun {
                 Dialog().okDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETE_MESSAGE, controller: self)
                 appDelegate.hasDeleteShownThisAppRun = true
+                vtMapView.setNeedsFocusUpdate()
             }
             editingPins = true
             navigationItem.rightBarButtonItem?.title = "Done"
@@ -300,7 +301,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
         for tempPhoto: Photo in tempPhotos {
             tempPhoto.posterImage = nil
-            print("Removing image name : \(tempPhoto.photo!)")
+//            print("Removing image name : \(tempPhoto.photo!)")
         }
         CoreDataStackManager.sharedInstance().saveContext()
         

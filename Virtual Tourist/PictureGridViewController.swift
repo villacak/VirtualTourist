@@ -140,6 +140,12 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 greaterIDNumber = tempPhoto.id
             }
             tempPhoto.posterImage = nil
+            sharedContext.deleteObject(tempPhoto)
+            do {
+                try sharedContext.save()
+            } catch let error as NSError {
+                print("Error : \(error.localizedDescription)")
+            }
         }
         CoreDataStackManager.sharedInstance().saveContext()
         
