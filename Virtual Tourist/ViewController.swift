@@ -289,13 +289,13 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     //
-    //
+    // Remove all those cached images belonging to the pin.
     //
     func removeCachedImages(cachedImagesToRemove: NSSet) {
         let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
         for tempPhoto: Photo in tempPhotos {
-            let fileName: String = tempPhoto.photo!
-            // still need to add the remove file.
+            tempPhoto.posterImage = nil
+            print("Removing image name : \(tempPhoto.photo!)")
         }
     }
 }
