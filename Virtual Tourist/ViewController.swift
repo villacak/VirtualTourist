@@ -111,8 +111,8 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Handle the tap touch
     //
     func handleLongTouch(getstureRecognizer : UIGestureRecognizer) {
-        if getstureRecognizer.state == UIGestureRecognizerState.Began {
-            if (editingPins == false) {
+        if (editingPins == false) {
+            if getstureRecognizer.state == UIGestureRecognizerState.Began {
                 return
             }
         }
@@ -176,7 +176,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
-        if let _ = view.annotation { 
+        if let _ = view.annotation {
             // Delete or redirect to the next view
             if (editingPins == true) {
                 var isDeleted: Bool = false
@@ -260,11 +260,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     @IBAction func editBtn(sender: AnyObject) {
         if (!editingPins) {
-            if !appDelegate.hasDeleteShownThisAppRun {
-//                Dialog().okDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETE_MESSAGE, controller: vtMapView)
-                appDelegate.hasDeleteShownThisAppRun = true
-                vtMapView.setNeedsFocusUpdate()
-            }
+            vtMapView.setNeedsFocusUpdate()
             editingPins = true
             navigationItem.rightBarButtonItem?.title = "Done"
             navigationController?.setToolbarHidden(false, animated: true)

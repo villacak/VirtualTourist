@@ -38,6 +38,7 @@ class VTConstants: NSObject {
     static let ADD_PIN_MESSAGE: String = "Press and hold on the desired location for 0.8 seconds to add the pin."
     static let DELETE_MESSAGE: String = "To delete, just tap on top of the pin that you want to delete"
     static let DELETED_MESSAGE: String = "Pin and pictures removed"
+    static let DELETE_SINGLE_PIC: String = "Do you want delete this photo?"
     
     // Keys used in the URL params
     static let METHOD_DIC_KEY: String = "method"

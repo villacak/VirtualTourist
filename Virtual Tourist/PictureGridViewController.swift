@@ -18,10 +18,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     @IBOutlet weak var newCollectionBtn: UIButton!
     @IBOutlet weak var vtMapView: MKMapView!
     
-//    var noImageLbl: UILabel!
+    //    var noImageLbl: UILabel!
     var appDelegate: AppDelegate!
     var photos: [Photo]?
-   
+    
     var inMemoryCache = NSCache()
     var spinner: ActivityIndicatorView!
     
@@ -69,6 +69,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     func defaultSettingsForEmptyArray() {
         picturesGridCol.hidden = true
         noImageLbl.hidden = false
+        callNewCollection()
     }
     
     //
@@ -126,6 +127,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     }
     
     
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        dialogWithOkAndCancel(indexPath.row)
+    }
+    
+    
     //
     // Function to call the service and populate data when response return
     //
@@ -157,7 +163,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
                 if let _ = tempPhotos {
                     self.photos = tempPhotos
-//                    self.prepateItemToPersistAndUpdateIt(tempPhotos!)
                 }
                 self.picturesGridCol.hidden = false
                 self.noImageLbl.hidden = true
@@ -179,20 +184,19 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     }
     
     
-    //
-    // Update the Pin record and pin selected
-    //
-//    func prepateItemToPersistAndUpdateIt(tempPhotos: [Photo]!) {
-//        for tempPhoto: Photo in tempPhotos! {
-//            self.photos?.append(tempPhoto)
-//        }
-//    }
-    
     
     //
     // New Collection Button
     //
     @IBAction func newCollectionBtn(sender: AnyObject) {
+        callNewCollection()
+    }
+    
+    
+    //
+    // Make the call for load a new collection
+    //
+    func callNewCollection() {
         newCollectionBtn.enabled = false
         spinner = ActivityIndicatorView(text: VTConstants.LOADING)
         view.addSubview(spinner)
@@ -202,6 +206,42 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let urlToCallTemp = UrlHelper().createSearchByLatitudeLogitudeRequestURL(lat: latString, lon: lonString)
         
         makeRESTCallAndGetResponse(urlToCallTemp, pin: appDelegate.pinSelected, controller: self, contextManaged: sharedContext)
+    }
+    
+    
+    //
+    // Dialog for be used by the delete photo from collection view
+    //
+    func dialogWithOkAndCancel(photoIndexForDelete: Int!) {
+        let alert: UIAlertController = UIAlertController(title: VTConstants.DELETE, message: VTConstants.DELETE_SINGLE_PIC, preferredStyle: UIAlertControllerStyle.Alert)
+        let ok: UIAlertAction = UIAlertAction(title: "Ok", style: .Default, handler: { (action: UIAlertAction!) in
+            self.deleteSinglePhoto(photoIndexForDelete)
+        })
+        
+        let cancel: UIAlertAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
+        
+        alert.addAction(ok)
+        alert.addAction(cancel)
+        self.presentViewController(alert, animated: true, completion: {})
+    }
+    
+    
+    //
+    // Delete a single picture from the collection
+    //
+    func deleteSinglePhoto(photoIndexForDelete: Int!) {
+        if let tempPhoto = photos?[photoIndexForDelete] {
+            do {
+                sharedContext.deleteObject(tempPhoto)
+                try sharedContext.save()
+                Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
+                CoreDataStackManager.sharedInstance().saveContext()
+                photos?.removeAtIndex(photoIndexForDelete)
+                self.picturesGridCol.reloadData()
+            } catch let error as NSError {
+                Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
+            }
+        }
     }
     
 }
