@@ -268,6 +268,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
             navigationItem.rightBarButtonItem?.title = "Edit"
             navigationController?.setToolbarHidden(true, animated: true)
         }
+        vtMapView.updateFocusIfNeeded()
     }
     
     
