@@ -202,12 +202,15 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 if let _ = pinToRemove {
                     for resultItem: Pin in result! {
                         if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
-//                            removeCachedImages(resultItem.photos!)
+                            // Using delete rules for Pin as cascade I can delete all childs records wihtout need to loop through it
+                            // removeCachedImages(resultItem.photos!)
                             sharedContext.deleteObject(resultItem)
                             do {
                                 try sharedContext.save()
                                 isDeleted = true
                             } catch let error as NSError {
+                                // I rollback if something went wrong.
+                                sharedContext.rollback()
                                 Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
                                 print("Error : \(error.localizedDescription)")
                             }
@@ -219,6 +222,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 if isDeleted {
                     appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     CoreDataStackManager.sharedInstance().saveContext()
+                    Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
                     mapView.removeAnnotation(view.annotation!)
                 }
             } else {
@@ -295,25 +299,25 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     }
     
     
-    //
-    // Remove all those cached images belonging to the pin.
-    //
-    func removeCachedImages(cachedImagesToRemove: NSSet) {
-        let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
-        for tempPhoto: Photo in tempPhotos {
-            // The line bellow is actually removing the photo, now using prepareToDelete
-            // tempPhoto.posterImage = nil
-            sharedContext.deleteObject(tempPhoto)
-        }
-        
-        do {
-            try sharedContext.save()
-            CoreDataStackManager.sharedInstance().saveContext()
-            Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
-        } catch let error as NSError {
-            Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
-        }
-        
-    }
+//    //
+//    // Remove all those cached images belonging to the pin.
+//    //
+//    func removeCachedImages(cachedImagesToRemove: NSSet) {
+//        let tempPhotos: [Photo] = cachedImagesToRemove.allObjects as NSArray as! [Photo]
+//        for tempPhoto: Photo in tempPhotos {
+//            // The line bellow is actually removing the photo, now using prepareToDelete
+//            // tempPhoto.posterImage = nil
+//            sharedContext.deleteObject(tempPhoto)
+//        }
+//        
+//        do {
+//            try sharedContext.save()
+//            CoreDataStackManager.sharedInstance().saveContext()
+//            Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
+//        } catch let error as NSError {
+//            Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
+//        }
+//        
+//    }
 }
 
