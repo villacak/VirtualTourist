@@ -110,16 +110,16 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Handle the tap touch
     //
-    func handleLongTouch(getstureRecognizer : UIGestureRecognizer) {
+    func handleLongTouch(gestureRecognizer : UIGestureRecognizer) {
         if (editingPins == false) {
-            if getstureRecognizer.state == UIGestureRecognizerState.Began {
+            if gestureRecognizer.state == UIGestureRecognizerState.Began {
                 return
             }
         }
         
         //  If editing map, mean tapped on the edit navigation buttom
-        if (editingPins == false) {
-            let touchPoint = getstureRecognizer.locationInView(self.vtMapView)
+        if (editingPins == false && gestureRecognizer.state == UIGestureRecognizerState.Ended) {
+            let touchPoint = gestureRecognizer.locationInView(self.vtMapView)
             let touchMapCoordinate: CLLocationCoordinate2D = vtMapView.convertPoint(touchPoint, toCoordinateFromView: vtMapView)
             let annotation = MKPointAnnotation()
             annotation.coordinate = touchMapCoordinate
