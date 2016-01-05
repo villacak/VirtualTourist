@@ -12,4 +12,5 @@ class PinCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var labelCell: UILabel!
     @IBOutlet weak var imageViewTableCell: UIImageView!
+    @IBOutlet weak var cellSpinner: UIActivityIndicatorView!
 }

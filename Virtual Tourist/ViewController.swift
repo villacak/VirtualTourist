@@ -22,7 +22,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     var appDelegate: AppDelegate!
-    var spinner: ActivityIndicatorView!
+    var spinner: ActivityIndicatorViewExt!
     
     let reusableId: String = "pinInfo"
     var editingPins: Bool = false
@@ -144,7 +144,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Add view to show the spin
     //
     func startSpin(spinText spinText: String) {
-        spinner = ActivityIndicatorView(text: spinText)
+        spinner = ActivityIndicatorViewExt(text: spinText)
         view.addSubview(spinner)
     }
     

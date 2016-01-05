@@ -18,12 +18,14 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     @IBOutlet weak var newCollectionBtn: UIButton!
     @IBOutlet weak var vtMapView: MKMapView!
     
-    //    var noImageLbl: UILabel!
+    var dataDictionary: NSDictionary?!
     var appDelegate: AppDelegate!
     var photos: [Photo]?
+    var batchSize: Int = 11
+    var photoIndex: Int = 0
     
     var inMemoryCache = NSCache()
-    var spinner: ActivityIndicatorView!
+    var spinner: ActivityIndicatorViewExt!
     
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
@@ -116,17 +118,44 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
-        let photo: Photo = photos![indexPath.row]
-        
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
-        cell.labelCell?.text = "\(photo.id)"
-        cell.imageViewTableCell?.image = photo.posterImage
-        cell.imageViewTableCell?.layer.borderWidth = 1.0
-        cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
+        if (photoIndex < batchSize) {
+            cell.imageViewTableCell?.layer.borderWidth = 1.0
+            cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
+            cell.cellSpinner = UIActivityIndicatorView()
+            cell.cellSpinner.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Gray
+            cell.cellSpinner.startAnimating()
+            
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+                let requests: Requests = Requests()
+                requests.requestPhoto(self.dataDictionary!!, pin: self.appDelegate.pinSelected, photoIndex: self.photoIndex, contextManaged: self.sharedContext, completionHandler: { (result, error) -> Void in
+                    if let photoResultTemp = result {
+                        let tempPhotos: [Photo]? = photoResultTemp
+                        if let _ = tempPhotos {
+                            self.photos?.append(tempPhotos![0])
+                            self.photoIndex++
+                        }
+                        dispatch_async(dispatch_get_main_queue()) {
+                            self.picturesGridCol.reloadData()
+                            cell.cellSpinner.stopAnimating()
+                            cell.cellSpinner.hidden = true
+                        }
+                    }
+                })
+            })
+            let photo: Photo? = photos![indexPath.row]
+            if let _ = photo {
+                cell.labelCell?.text = "\(photo!.id)"
+                cell.imageViewTableCell?.image = photo!.posterImage
+            }
+        }
         return cell
     }
     
     
+    //
+    // Return to the collection view the max number of rows
+    //
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         dialogWithOkAndCancel(indexPath.row)
     }
@@ -159,11 +188,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         // Change to false the line bellow and enable the second line to have option to select a picture
         // instead random
         helperObject.requestSearch(urlToCall: urlToCall, pin: pin, greaterID: greaterIDNumber as Int, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
-            if let photoResultTemp = result {
-                let tempPhotos: [Photo]? = photoResultTemp as? [Photo]
-                if let _ = tempPhotos {
-                    self.photos = tempPhotos
-                }
+            if let dataResultTemp = result {
+                self.dataDictionary = dataResultTemp
                 self.picturesGridCol.hidden = false
                 self.noImageLbl.hidden = true
                 dispatch_async(dispatch_get_main_queue()) {
@@ -197,8 +223,9 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Make the call for load a new collection
     //
     func callNewCollection() {
+        photoIndex = 0
         newCollectionBtn.enabled = false
-        spinner = ActivityIndicatorView(text: VTConstants.LOADING)
+        spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
         view.addSubview(spinner)
         
         let latString: String = String((appDelegate.pinSelected?.latitude)!)
@@ -232,6 +259,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     func deleteSinglePhoto(photoIndexForDelete: Int!) {
         if let tempPhoto = photos?[photoIndexForDelete] {
             do {
+                // It's not needed add tempPhoto.posterImage = nil as it's been done into the Photo entity.
                 sharedContext.deleteObject(tempPhoto)
                 try sharedContext.save()
                 Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 2, controller: self)
