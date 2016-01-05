@@ -21,8 +21,9 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var dataDictionary: NSDictionary?!
     var appDelegate: AppDelegate!
     var photos: [Photo]?
-    var batchSize: Int = 11
+    var batchSize: Int = 0
     var photoIndex: Int = 0
+    var simpleCounter: Int = 0;
     
     var inMemoryCache = NSCache()
     var spinner: ActivityIndicatorViewExt!
@@ -109,7 +110,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Return the count value that has the amount of items within the array
     //
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photos!.count
+        return batchSize //photos!.count
     }
     
     
@@ -119,35 +120,40 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
-        if (photoIndex < batchSize) {
+        if (simpleCounter < batchSize) {
             cell.imageViewTableCell?.layer.borderWidth = 1.0
             cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
-            cell.cellSpinner = UIActivityIndicatorView()
-            cell.cellSpinner.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.Gray
             cell.cellSpinner.startAnimating()
             
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
                 let requests: Requests = Requests()
                 requests.requestPhoto(self.dataDictionary!!, pin: self.appDelegate.pinSelected, photoIndex: self.photoIndex, contextManaged: self.sharedContext, completionHandler: { (result, error) -> Void in
                     if let photoResultTemp = result {
                         let tempPhotos: [Photo]? = photoResultTemp
                         if let _ = tempPhotos {
                             self.photos?.append(tempPhotos![0])
-                            self.photoIndex++
+                            if (self.photoIndex >= 250) {
+                                self.photoIndex = 0
+                            } else {
+                                self.photoIndex++
+                                self.simpleCounter++
+                            }
                         }
                         dispatch_async(dispatch_get_main_queue()) {
                             self.picturesGridCol.reloadData()
                             cell.cellSpinner.stopAnimating()
                             cell.cellSpinner.hidden = true
+                            if (indexPath.row <= self.photos?.count) {
+                                let photo: Photo? = self.photos![indexPath.row]
+                                if let _ = photo {
+                                    cell.labelCell?.text = "\(photo!.id)"
+                                    cell.imageViewTableCell?.image = photo!.posterImage
+                                }
+                            }
                         }
                     }
                 })
-            })
-            let photo: Photo? = photos![indexPath.row]
-            if let _ = photo {
-                cell.labelCell?.text = "\(photo!.id)"
-                cell.imageViewTableCell?.image = photo!.posterImage
-            }
+//            })
         }
         return cell
     }
@@ -182,6 +188,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 print("Error : \(error.localizedDescription)")
             }
         }
+        photoIndex = greaterIDNumber as Int
         CoreDataStackManager.sharedInstance().saveContext()
         
         
@@ -189,13 +196,14 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         // instead random
         helperObject.requestSearch(urlToCall: urlToCall, pin: pin, greaterID: greaterIDNumber as Int, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
             if let dataResultTemp = result {
-                self.dataDictionary = dataResultTemp
                 self.picturesGridCol.hidden = false
                 self.noImageLbl.hidden = true
+                self.newCollectionBtn.enabled = true
                 dispatch_async(dispatch_get_main_queue()) {
-                    self.newCollectionBtn.enabled = true
-                    self.picturesGridCol.reloadData()
                     self.spinner.hide()
+                    self.batchSize = 9
+                    self.dataDictionary = dataResultTemp
+                    self.picturesGridCol.reloadData()
                 }
                 
             } else {
@@ -223,7 +231,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Make the call for load a new collection
     //
     func callNewCollection() {
-        photoIndex = 0
+        simpleCounter = 0
         newCollectionBtn.enabled = false
         spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
         view.addSubview(spinner)
