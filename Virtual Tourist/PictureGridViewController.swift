@@ -160,6 +160,26 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     
     
     //
+    // Helper function foe the cell, load data
+    //
+    func cellHelper(photoIndex: Int!) -> NSURL {
+        let jsonPhotos: [String : AnyObject] = dataDictionary!!["photos"] as! [String : AnyObject]
+        let arrayDictionaryPhoto: [[String : AnyObject]] = jsonPhotos["photo"] as! [[String : AnyObject]]
+        
+        var url: NSURL? = NSURL()
+        if (arrayDictionaryPhoto.count > 0) {
+            var photosArray: [Photo] = [Photo]()
+            let urlHelper: UrlHelper = UrlHelper()
+            let photoObj: PhotoComplete = urlHelper.populatePhoto(arrayDictionaryPhoto[photoIndex])
+            let urlToCall: String = urlHelper.assembleUrlToLoadImageFromSearch(photoObj)
+            
+            url = NSURL(string: urlToCall)!
+        }
+        return url
+    }
+    
+    
+    //
     // Return to the collection view the max number of rows
     //
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
