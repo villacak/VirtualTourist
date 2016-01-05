@@ -39,5 +39,9 @@ class Pin: NSManagedObject {
         latitude = photoDictionary[Keys.latitude] as! Double
         longitude = photoDictionary[Keys.longitude] as! Double
     }
-
+    
+    
+    override func prepareForDeletion() {
+    }
+    
 }

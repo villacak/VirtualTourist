@@ -145,7 +145,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             if (tempPhoto.id as Int) >= (greaterIDNumber as Int) {
                 greaterIDNumber = tempPhoto.id
             }
-            tempPhoto.posterImage = nil
+            // Now using prepare for deletion into entity
+            // tempPhoto.posterImage = nil
             sharedContext.deleteObject(tempPhoto)
             do {
                 try sharedContext.save()

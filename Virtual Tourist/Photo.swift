@@ -42,6 +42,11 @@ class Photo: NSManagedObject {
         }
     }
     
+    override func prepareForDeletion() {
+        // I don't need anything more then this line, refer ImageCache.swift line 43.
+        self.posterImage = nil
+    }
+    
     
     var posterImage: UIImage? {
         get {
