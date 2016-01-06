@@ -23,6 +23,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var photos: [Photo]?
     var batchSize: Int = 0
     var photoIndex: Int = 250
+    var internalCounter: Int = 0
     var jsonPhotos: [String : AnyObject]?
     var arrayDictionaryPhoto: [[String : AnyObject]]?
     var isCallNewCollection: Bool = false
@@ -57,8 +58,13 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             if photos?.count > 0 {
                 picturesGridCol.hidden = false
                 noImageLbl.hidden = true
-                batchSize = VTConstants.BATCH_SIZE
+                if (photos?.count < VTConstants.BATCH_SIZE) {
+                    batchSize = photos!.count
+                } else {
+                    batchSize = VTConstants.BATCH_SIZE
+                }
             } else {
+                photos = [Photo]()
                 defaultSettingsForEmptyArray()
             }
         } else {
@@ -130,22 +136,33 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         if (isCallNewCollection) {
             checkCounters()
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-                if (self.photoIndex < self.arrayDictionaryPhoto?.count) {
-                    let photoResultTuple = self.requestPhoto(self.cellUrlHelper(self.photoIndex))
+                if (self.photoIndex < self.arrayDictionaryPhoto?.count && self.photoIndex < self.batchSize) {
+                    print("photo index \(self.photoIndex)")
+                    let tempPhotoComplete: PhotoComplete = self.cellUrlHelper(self.photoIndex)
+                    let photoResultTuple = self.requestPhoto(tempPhotoComplete, indexId: self.photoIndex)
                     if let photoResultTemp = photoResultTuple.photoObject {
-                        let tempPhoto: Photo! = photoResultTemp
-                        self.photos?.append(tempPhoto!)
                         dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
+                            self.internalCounter++
+                            let tempPhoto: Photo! = photoResultTemp
                             self.picturesGridCol.reloadData()
                             cell.cellSpinner.stopAnimating()
                             cell.cellSpinner.hidden = true
-//                            cell.labelCell?.text = "\(tempPhoto!.id)"
-//                            cell.imageViewTableCell?.image = tempPhoto!.posterImage
+                            cell.labelCell?.text = "\(tempPhoto!.id)"
+                            cell.imageViewTableCell?.image = tempPhoto!.posterImage
+                            if (self.internalCounter == self.batchSize) {
+                                // Just save after load everything
+                                CoreDataStackManager.sharedInstance().saveContext()
+                                self.internalCounter = 0
+                                self.isCallNewCollection = false
+                            }
                         })
+                    } else {
+                        print("Error from tuple \(photoResultTuple.errorMessage!)")
                     }
                 }
             })
         } else {
+            print("photos count \(photos?.count)")
             let photoTemp: Photo = photos![indexPath.row]
             cell.cellSpinner.stopAnimating()
             cell.labelCell?.text = "\(photoTemp.id)"
@@ -211,6 +228,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 }
             }
             photoIndex = greaterIDNumber as Int
+            print("photos count \(photoIndex)")
             CoreDataStackManager.sharedInstance().saveContext()
         }
         
@@ -229,8 +247,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     self.spinner.hide()
                     if (self.arrayDictionaryPhoto?.count < self.batchSize) {
                         self.batchSize = (self.arrayDictionaryPhoto?.count)!
+                        print("batch size \(self.batchSize)")
                     } else {
                         self.batchSize = VTConstants.BATCH_SIZE  // Assign the value here to reload data just when I have the dictionary
+                        print("batch size \(self.batchSize)")
                     }
                     self.picturesGridCol.reloadData()
                 }
@@ -238,7 +258,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
                     self.newCollectionBtn.enabled = true
-                    //                    self.spinner.hide()
+                    self.spinner.hide()
                     Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error!, controller: controller)
                 }
             }
@@ -314,7 +334,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Return the PhotoResult populated
     //
-    func requestPhoto(photoObj: PhotoComplete?) ->(photoObject: Photo?, errorMessage: String?){
+    func requestPhoto(photoObj: PhotoComplete?, indexId: Int!) ->(photoObject: Photo?, errorMessage: String?){
         var tempPhoto: Photo?
         
         if let _ = photoObj {
@@ -326,7 +346,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 let imageTemp: UIImage? = UIImage(data: imageData)!
                 
                 if let _ = imageTemp {
-                    let tempId: Int = photoIndex + 1
+                    let tempId: Int = indexId + 1  // For some reason indexId++ was giving me error
                     print("--- ID : \(tempId)")
                     let dictionary: [String: AnyObject] = [
                         Photo.Keys.ID : tempId,
@@ -337,9 +357,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)
                     tempPhoto!.position = appDelegate.pinSelected
                     tempPhoto!.posterImage = imageTemp
+                    
+                    photos?.append(tempPhoto!)
+                    print("photos count \(photos!.count)")
                 }
             }
-            CoreDataStackManager.sharedInstance().saveContext()
             return (photoObject: tempPhoto, errorMessage: nil)
         } else {
             print("No Result Found")
