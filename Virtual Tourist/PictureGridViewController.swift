@@ -23,7 +23,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var photos: [Photo]?
     var batchSize: Int = 0
     var photoIndex: Int = 250
-    var simpleCounter: Int = 0;
     var jsonPhotos: [String : AnyObject]?
     var arrayDictionaryPhoto: [[String : AnyObject]]?
     var isCallNewCollection: Bool = false
@@ -124,38 +123,34 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
-//        if (simpleCounter <= batchSize) {
-            cell.imageViewTableCell?.layer.borderWidth = 1.0
-            cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
-            cell.cellSpinner.startAnimating()
-            print("photoIndex \(photoIndex), simpleCounter \(simpleCounter)")
-            print("index row : \(indexPath.row)")
+        cell.imageViewTableCell?.layer.borderWidth = 1.0
+        cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
+        cell.cellSpinner.startAnimating()
         
-            if (isCallNewCollection) {
-                checkCounters()
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-                    if (self.photoIndex < self.arrayDictionaryPhoto?.count) {
-                        let photoResultTuple = self.requestPhoto(self.cellUrlHelper(self.photoIndex))
-                        if let photoResultTemp = photoResultTuple.photoObject {
-                            let tempPhoto: Photo! = photoResultTemp
-                            self.photos?.append(tempPhoto!)
-                            dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
-                                self.picturesGridCol.reloadData()
-                                cell.cellSpinner.stopAnimating()
-                                cell.cellSpinner.hidden = true
-                                cell.labelCell?.text = "\(tempPhoto!.id)"
-                                cell.imageViewTableCell?.image = tempPhoto!.posterImage
-                            })
-                        }
+        if (isCallNewCollection) {
+            checkCounters()
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+                if (self.photoIndex < self.arrayDictionaryPhoto?.count) {
+                    let photoResultTuple = self.requestPhoto(self.cellUrlHelper(self.photoIndex))
+                    if let photoResultTemp = photoResultTuple.photoObject {
+                        let tempPhoto: Photo! = photoResultTemp
+                        self.photos?.append(tempPhoto!)
+                        dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
+                            self.picturesGridCol.reloadData()
+                            cell.cellSpinner.stopAnimating()
+                            cell.cellSpinner.hidden = true
+//                            cell.labelCell?.text = "\(tempPhoto!.id)"
+//                            cell.imageViewTableCell?.image = tempPhoto!.posterImage
+                        })
                     }
-                })
-            } else {
-                let photoTemp: Photo = photos![indexPath.row]
-                cell.cellSpinner.stopAnimating()
-                cell.labelCell?.text = "\(photoTemp.id)"
-                cell.imageViewTableCell?.image = photoTemp.posterImage
-            }
-//        }
+                }
+            })
+        } else {
+            let photoTemp: Photo = photos![indexPath.row]
+            cell.cellSpinner.stopAnimating()
+            cell.labelCell?.text = "\(photoTemp.id)"
+            cell.imageViewTableCell?.image = photoTemp.posterImage
+        }
         return cell
     }
     
@@ -168,7 +163,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             self.photoIndex = 0
         } else {
             self.photoIndex++
-            self.simpleCounter++
         }
     }
     
@@ -267,7 +261,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     func callNewCollection() {
         isCallNewCollection = true
-        simpleCounter = 0
         newCollectionBtn.enabled = false
         spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
         view.addSubview(spinner)
