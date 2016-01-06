@@ -23,7 +23,7 @@
 		3394F3AE1C13E5BB0019ABA7 /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3AD1C13E5BB0019ABA7 /* CoreDataStackManager.swift */; };
 		3394F3B31C1517AE0019ABA7 /* VTConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3B21C1517AE0019ABA7 /* VTConstants.swift */; };
 		3394F3B61C1519ED0019ABA7 /* Dialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3B51C1519ED0019ABA7 /* Dialog.swift */; };
-		3394F3B81C151AAF0019ABA7 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3B71C151AAF0019ABA7 /* ActivityIndicatorView.swift */; };
+		3394F3B81C151AAF0019ABA7 /* ActivityIndicatorViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3394F3B71C151AAF0019ABA7 /* ActivityIndicatorViewExt.swift */; };
 		33A608AA1C166E6300A7D744 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A608A91C166E6300A7D744 /* Pin.swift */; };
 		33F6129C1C345022008DCB50 /* VirtualTouristDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */; };
 		33F6129E1C34510A008DCB50 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33F6129D1C34510A008DCB50 /* Config.swift */; };
@@ -50,7 +50,7 @@
 		3394F3AD1C13E5BB0019ABA7 /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 		3394F3B21C1517AE0019ABA7 /* VTConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VTConstants.swift; sourceTree = "<group>"; };
 		3394F3B51C1519ED0019ABA7 /* Dialog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dialog.swift; sourceTree = "<group>"; };
-		3394F3B71C151AAF0019ABA7 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
+		3394F3B71C151AAF0019ABA7 /* ActivityIndicatorViewExt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorViewExt.swift; sourceTree = "<group>"; };
 		33A608A91C166E6300A7D744 /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
 		33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VirtualTouristDB.swift; sourceTree = "<group>"; };
 		33F6129D1C34510A008DCB50 /* Config.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
@@ -129,7 +129,7 @@
 			children = (
 				3394F3B21C1517AE0019ABA7 /* VTConstants.swift */,
 				3394F3B51C1519ED0019ABA7 /* Dialog.swift */,
-				3394F3B71C151AAF0019ABA7 /* ActivityIndicatorView.swift */,
+				3394F3B71C151AAF0019ABA7 /* ActivityIndicatorViewExt.swift */,
 				3357CEDC1C28FA7000C577EE /* Utils.swift */,
 				337A90D01C32F69F001C6CB3 /* UrlHelper.swift */,
 				33F6129B1C345022008DCB50 /* VirtualTouristDB.swift */,
@@ -221,7 +221,7 @@
 				33A608AA1C166E6300A7D744 /* Pin.swift in Sources */,
 				33F612A31C346039008DCB50 /* ImageCache.swift in Sources */,
 				33F6129C1C345022008DCB50 /* VirtualTouristDB.swift in Sources */,
-				3394F3B81C151AAF0019ABA7 /* ActivityIndicatorView.swift in Sources */,
+				3394F3B81C151AAF0019ABA7 /* ActivityIndicatorViewExt.swift in Sources */,
 				33F6129E1C34510A008DCB50 /* Config.swift in Sources */,
 				3357CED91C265B1400C577EE /* PinCollectionViewCell.swift in Sources */,
 				3392039A1C13C98B0023D4C9 /* AppDelegate.swift in Sources */,

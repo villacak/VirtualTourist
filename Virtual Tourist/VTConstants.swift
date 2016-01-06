@@ -32,6 +32,7 @@ class VTConstants: NSObject {
     // Messages strings
     static let DELETE:String = "Delete"
     static let LOADING: String = "Loading..."
+    static let PREPARING: String = "Preparing..."
     static let NO_IMAGE: String = "No Image(s)"
     static let ERROR: String = "Error"
     static let ADD_PIN: String = "Adding Pin"

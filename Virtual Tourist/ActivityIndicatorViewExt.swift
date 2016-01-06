@@ -1,5 +1,5 @@
 //
-//  ActivityIndicatorView.swift
+//  ActivityIndicatorViewExt.swift
 //  Virtual Tourist
 //
 //  Created by Klaus Villaca on 12/6/15.
@@ -12,7 +12,7 @@ import UIKit
 // http://stackoverflow.com/questions/32269646/cannot-hide-activity-indicator-at-end-of-api-call
 //
 // The idea is have a processing modal showing to the user while the request is processed.
-class ActivityIndicatorView: UIVisualEffectView {
+class ActivityIndicatorViewExt: UIVisualEffectView {
     
     // Check if the text has been define to set it, may be already set or null
     var text: String? {
