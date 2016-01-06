@@ -28,6 +28,7 @@ class VTConstants: NSObject {
     // Empty String
     static let EMPTY_STRING: String = ""
     
+    static let BATCH_SIZE: Int = 10
     
     // Messages strings
     static let DELETE:String = "Delete"

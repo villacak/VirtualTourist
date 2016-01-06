@@ -114,7 +114,7 @@ class CoreDataStackManager {
                 let nserror = error as NSError
                 print("##### error : \(nserror.userInfo)")
                 NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
-                abort()
+//                abort()
             }
         }
     }
