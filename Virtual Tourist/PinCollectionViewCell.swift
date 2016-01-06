@@ -13,4 +13,15 @@ class PinCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var labelCell: UILabel!
     @IBOutlet weak var imageViewTableCell: UIImageView!
     @IBOutlet weak var cellSpinner: UIActivityIndicatorView!
+    
+//    override func awakeFromNib() {
+//        super.awakeFromNib()
+//        self.selected = false
+//    }
+    
+//    override var selected : Bool {
+//        didSet {
+//            self.backgroundColor = selected ? UIColor.whiteColor() : UIColor.blackColor()
+//        }
+//    }
 }
