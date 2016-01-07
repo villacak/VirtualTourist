@@ -321,6 +321,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 CoreDataStackManager.sharedInstance().saveContext()
                 photos?.removeAtIndex(photoIndexForDelete)
                 batchSize-- // Need to reduce the batch size to don't have problem when scrolling photos
+                self.picturesGridCol.reloadData()
+                
                 if (photos?.count == 0) {
                     removePin()
                     
@@ -329,9 +331,13 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     defaults.setObject(true, forKey: VTConstants.DEFAULT_KEY)
                     
                     // Return to the previous view as doesn't have photos anymore
-                    navigationController?.popViewControllerAnimated(true)
+//                    let viewsTemp = self.navigationController?.viewControllers
+//                    let stackViews = self.navigationController?.viewControllers.count
+//                    let viewCollectionControllerTemp = self.navigationController!.viewControllers[1] as! PictureGridViewController
+//                    let viewControllerTemp = self.navigationController!.viewControllers[0] as! UIViewController
+//                    viewControllerTemp..resultSearchController.active = false
+                    self.navigationController?.popToRootViewControllerAnimated(true)
                 }
-                self.picturesGridCol.reloadData()
             } catch let error as NSError {
                 Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
             }
