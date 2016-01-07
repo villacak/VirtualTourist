@@ -179,48 +179,11 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         if let _ = view.annotation {
             // Delete or redirect to the next view
             if (editingPins == true) {
-                var isDeleted: Bool = false
-                let util: Utils = Utils()
-                let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: appDelegate.pins as [Pin], pinToRemove: view.annotation!)!
-                
-                // Should have a easier way to retreive one record from DB than doing this, or retrieve from the fetchedResultsController var
-                let fetchRequest = NSFetchRequest(entityName: Pin.Keys.PinClass)
-                fetchRequest.returnsObjectsAsFaults = false
-                fetchRequest.predicate = NSPredicate(format: "id == %@", (pinToRemove?.id)!)
-                let sorter: NSSortDescriptor = NSSortDescriptor(key: "id" , ascending: true)
-                fetchRequest.sortDescriptors = [sorter]
-                
-                var result: [Pin]?
-                do {
-                    result = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
-                } catch let error as NSError{
-                    Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
-                    print("Error: \(error.localizedDescription)")
-                    result = nil
-                }
-                
-                if let _ = pinToRemove {
-                    for resultItem: Pin in result! {
-                        if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
-                            // Using delete rules for Pin as cascade I can delete all childs records wihtout need to loop through it
-                            // removeCachedImages(resultItem.photos!)
-                            sharedContext.deleteObject(resultItem)
-                            do {
-                                try sharedContext.save()
-                                isDeleted = true
-                            } catch let error as NSError {
-                                // I rollback if something went wrong.
-                                sharedContext.rollback()
-                                Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
-                                print("Error : \(error.localizedDescription)")
-                            }
-                            break
-                        }
-                    }
-                }
+                let utils: Utils = Utils()
+                let isDeleted: Bool = utils.removePin(pinArray: appDelegate.pins as [Pin], pinAnnotation: view.annotation!, sharedContext: sharedContext, controller: self)
                 
                 if isDeleted {
-                    appDelegate.pins = util.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
+                    appDelegate.pins = utils.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     CoreDataStackManager.sharedInstance().saveContext()
                     Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
                     mapView.removeAnnotation(view.annotation!)

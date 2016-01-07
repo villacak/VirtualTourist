@@ -229,6 +229,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 }
             }
             photoIndex = greaterIDNumber as Int
+            print("--- PHOTO INDEX higher value \(photoIndex)")
             CoreDataStackManager.sharedInstance().saveContext()
         }
         
@@ -263,7 +264,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             
         })
     }
-    
     
     
     //
@@ -320,6 +320,9 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 2, controller: self)
                 CoreDataStackManager.sharedInstance().saveContext()
                 photos?.removeAtIndex(photoIndexForDelete)
+                if (photos?.count == 0) {
+                    removePin()
+                }
                 self.picturesGridCol.reloadData()
             } catch let error as NSError {
                 Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
@@ -327,6 +330,26 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         }
     }
     
+    
+    
+    //
+    // Remove Pin and also remove the pin from the array
+    //
+    func removePin() {
+        let utils: Utils = Utils()
+        let annotationPoint: MKPointAnnotation = MKPointAnnotation()
+        annotationPoint.coordinate.latitude = appDelegate.pinSelected?.latitude as! Double
+        annotationPoint.coordinate.longitude = appDelegate.pinSelected?.longitude as! Double
+        
+        
+        let isDeleted: Bool = utils.removePin(pinArray: appDelegate.pins as [Pin], pinAnnotation: annotationPoint, sharedContext: sharedContext, controller: self)
+        
+        if isDeleted {
+            appDelegate.pins = utils.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: annotationPoint)
+            CoreDataStackManager.sharedInstance().saveContext()
+            Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
+        }
+    }
     
     
     //
