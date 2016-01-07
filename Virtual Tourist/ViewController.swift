@@ -65,6 +65,38 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     
     //
+    // View will appear, 
+    //
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(true)
+        
+        // I'm using this logic just to avoid repopulate the map, because I also could reload everything
+        // Everytime the view will appear is called
+        let defaults = NSUserDefaults.standardUserDefaults()
+        if let isUpdatePins : Bool?  = defaults.boolForKey(VTConstants.DEFAULT_KEY) {
+            if isUpdatePins! {
+                // Change the update key
+                let defaults = NSUserDefaults.standardUserDefaults()
+                defaults.setObject(false, forKey: VTConstants.DEFAULT_KEY)
+                
+                // Remove all annotations from the map
+                vtMapView.removeAnnotations(vtMapView.annotations)
+                
+                // Clean up those appDelegate vars
+                appDelegate.pins.removeAll()
+                appDelegate.pinSelected = nil
+                
+                // run all functions calls again
+                poulatePinArray()
+                checkForPins()
+                restoreMapRegion(false)
+            }
+        }
+
+    }
+    
+    
+    //
     // Populate the Pin array from the DB
     //
     func poulatePinArray() {

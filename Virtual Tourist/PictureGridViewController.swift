@@ -320,8 +320,16 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 2, controller: self)
                 CoreDataStackManager.sharedInstance().saveContext()
                 photos?.removeAtIndex(photoIndexForDelete)
+                batchSize-- // Need to reduce the batch size to don't have problem when scrolling photos
                 if (photos?.count == 0) {
                     removePin()
+                    
+                    // Set a flag to re-populate pins in the map from previous view
+                    let defaults = NSUserDefaults.standardUserDefaults()
+                    defaults.setObject(true, forKey: VTConstants.DEFAULT_KEY)
+                    
+                    // Return to the previous view as doesn't have photos anymore
+                    navigationController?.popViewControllerAnimated(true)
                 }
                 self.picturesGridCol.reloadData()
             } catch let error as NSError {
