@@ -110,8 +110,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(true)
-        photos = nil
+        photos?.removeAll()
         appDelegate.pinSelected = nil
+        arrayDictionaryPhoto?.removeAll()
+        jsonPhotos?.removeAll()
     }
     
     
@@ -119,7 +121,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Return the count value that has the amount of items within the array
     //
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return batchSize //photos!.count
+        return batchSize
     }
     
     
@@ -137,7 +139,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             checkCounters()
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
                 if (self.photoIndex < self.arrayDictionaryPhoto?.count && self.photoIndex < self.batchSize) {
-                    print("photo index \(self.photoIndex)")
                     let tempPhotoComplete: PhotoComplete = self.cellUrlHelper(self.photoIndex)
                     let photoResultTuple = self.requestPhoto(tempPhotoComplete, indexId: self.photoIndex)
                     if let photoResultTemp = photoResultTuple.photoObject {
@@ -162,7 +163,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 }
             })
         } else {
-            print("photos count \(photos?.count)")
             let photoTemp: Photo = photos![indexPath.row]
             cell.cellSpinner.stopAnimating()
             cell.labelCell?.text = "\(photoTemp.id)"
@@ -224,11 +224,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 do {
                     try sharedContext.save()
                 } catch let error as NSError {
+                    // Should add a timed dialog over here???
                     print("Error : \(error.localizedDescription)")
                 }
             }
             photoIndex = greaterIDNumber as Int
-            print("photos count \(photoIndex)")
             CoreDataStackManager.sharedInstance().saveContext()
         }
         
@@ -247,10 +247,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     self.spinner.hide()
                     if (self.arrayDictionaryPhoto?.count < self.batchSize) {
                         self.batchSize = (self.arrayDictionaryPhoto?.count)!
-                        print("batch size \(self.batchSize)")
                     } else {
                         self.batchSize = VTConstants.BATCH_SIZE  // Assign the value here to reload data just when I have the dictionary
-                        print("batch size \(self.batchSize)")
                     }
                     self.picturesGridCol.reloadData()
                 }
@@ -353,18 +351,15 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                         Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
                     ]
                     
-                    print("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
                     tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)
                     tempPhoto!.position = appDelegate.pinSelected
                     tempPhoto!.posterImage = imageTemp
                     
                     photos?.append(tempPhoto!)
-                    print("photos count \(photos!.count)")
                 }
             }
             return (photoObject: tempPhoto, errorMessage: nil)
         } else {
-            print("No Result Found")
             return (photoObject: nil, errorMessage: "No result Found!")
         }
     }
