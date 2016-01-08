@@ -331,12 +331,12 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     defaults.setObject(true, forKey: VTConstants.DEFAULT_KEY)
                     
                     // Return to the previous view as doesn't have photos anymore
-//                    let viewsTemp = self.navigationController?.viewControllers
-//                    let stackViews = self.navigationController?.viewControllers.count
-//                    let viewCollectionControllerTemp = self.navigationController!.viewControllers[1] as! PictureGridViewController
-//                    let viewControllerTemp = self.navigationController!.viewControllers[0] as! UIViewController
-//                    viewControllerTemp..resultSearchController.active = false
-                    self.navigationController?.popToRootViewControllerAnimated(true)
+                    // It's needed to hold a bit to the Dialog be dimissed to then return
+                    let delay = 2 * Double(NSEC_PER_SEC)
+                    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+                    dispatch_after(time, dispatch_get_main_queue(), {
+                        self.navigationController?.popToRootViewControllerAnimated(true)
+                    })
                 }
             } catch let error as NSError {
                 Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: self)
