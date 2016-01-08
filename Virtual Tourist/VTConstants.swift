@@ -28,7 +28,7 @@ class VTConstants: NSObject {
     // Empty String
     static let EMPTY_STRING: String = ""
     
-    static let BATCH_SIZE: Int = 3//10
+    static let BATCH_SIZE: Int = 10
     static let DEFAULT_KEY: String = "updatePins"
     
     // Messages strings

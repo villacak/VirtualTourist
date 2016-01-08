@@ -217,7 +217,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                 if isDeleted {
                     appDelegate.pins = utils.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     CoreDataStackManager.sharedInstance().saveContext()
-                    Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
+                    Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 1, controller: self)
                     mapView.removeAnnotation(view.annotation!)
                 }
             } else {

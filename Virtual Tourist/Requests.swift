@@ -19,7 +19,7 @@ class Requests: NSObject {
     //
     // Make the request for search by latitude and longitude
     //
-    func requestSearch(urlToCall urlToCall: String, pin: Pin!, greaterID: Int!, controller: UIViewController, contextManaged: NSManagedObjectContext, completionHandler:(result: NSDictionary?, error: String?) -> Void) -> NSURLSessionDataTask  {
+    func requestSearch(urlToCall urlToCall: String, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext, completionHandler:(result: NSDictionary?, error: String?) -> Void) -> NSURLSessionDataTask  {
         let url: NSURL = NSURL(string: urlToCall)!
         let request: NSMutableURLRequest = NSMutableURLRequest(URL: url)
         request.HTTPMethod = VTConstants.POST_METHOD

@@ -22,14 +22,13 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var appDelegate: AppDelegate!
     var photos: [Photo]?
     var batchSize: Int = 0
-    var photoIndex: Int = 250
-    var internalCounter: Int = 0
+    var photoIndex: Int = 0//250
     var jsonPhotos: [String : AnyObject]?
     var arrayDictionaryPhoto: [[String : AnyObject]]?
-    var isCallNewCollection: Bool = false
     
     var inMemoryCache = NSCache()
     var spinner: ActivityIndicatorViewExt!
+    var urlHelper: UrlHelper!
     
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
@@ -133,64 +132,53 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
         cell.imageViewTableCell?.layer.borderWidth = 1.0
         cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
+        cell.labelCell?.text = "\(indexPath.row)"
         cell.cellSpinner.startAnimating()
         
-        if (isCallNewCollection) {
-            checkCounters()
+        print("indexPath.row \(indexPath.row)")
+        
+        if (photos!.count > 0 && photos?.count > indexPath.row) {
+            let photoTemp = self.photos?[indexPath.row]
+            cell.cellSpinner.stopAnimating()
+            cell.imageViewTableCell?.image = photoTemp!.posterImage
+        } else {
+            let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexPath.row)
+            let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
+            let url: NSURL = NSURL(string: urlToCall)!
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-                if (self.photoIndex < self.arrayDictionaryPhoto?.count && self.photoIndex < self.batchSize) {
-                    let tempPhotoComplete: PhotoComplete = self.cellUrlHelper(self.photoIndex)
-                    let photoResultTuple = self.requestPhoto(tempPhotoComplete, indexId: self.photoIndex)
-                    if let photoResultTemp = photoResultTuple.photoObject {
-                        dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
-                            self.internalCounter++
-                            let tempPhoto: Photo! = photoResultTemp
-                            self.picturesGridCol.reloadData()
-                            cell.cellSpinner.stopAnimating()
-                            cell.cellSpinner.hidden = true
-                            cell.labelCell?.text = "\(tempPhoto!.id)"
-                            cell.imageViewTableCell?.image = tempPhoto!.posterImage
-                            if (self.internalCounter == self.batchSize) {
-                                // Just save after load everything
-                                CoreDataStackManager.sharedInstance().saveContext()
-                                self.internalCounter = 0
-                                self.isCallNewCollection = false
-                            }
-                        })
-                    } else {
-                        print("Error from tuple \(photoResultTuple.errorMessage!)")
-                    }
+                if let imageData = NSData(contentsOfURL: url) {
+                    let imageTemp: UIImage? = UIImage(data: imageData)!
+                    
+                    dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
+                        self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexPath.row)
+                        cell.cellSpinner.stopAnimating()
+                        cell.cellSpinner.hidden = true
+                        cell.labelCell?.text = "\(indexPath.row)"
+                        cell.imageViewTableCell?.image = imageTemp//tempPhoto!.posterImage
+                        cell.cellSpinner.stopAnimating()
+                        
+                        if (self.photos?.count == self.batchSize) {
+                            CoreDataStackManager.sharedInstance().saveContext()
+                        }
+                    })
                 }
             })
-        } else {
-            let photoTemp: Photo = photos![indexPath.row]
-            cell.cellSpinner.stopAnimating()
-            cell.labelCell?.text = "\(photoTemp.id)"
-            cell.imageViewTableCell?.image = photoTemp.posterImage
         }
         return cell
     }
     
     
     //
-    // Update counters
-    //
-    func checkCounters() {
-        if (self.photoIndex >= 250) {
-            self.photoIndex = 0
-        } else {
-            self.photoIndex++
-        }
-    }
-    
-    //
     // Helper function foe the cell, load data
     //
-    func cellUrlHelper(photoIndex: Int!) -> PhotoComplete! {
+    func cellUrlHelper(cellPhotoIndex: Int!) -> PhotoComplete! {
         var photoObj: PhotoComplete?
         if (arrayDictionaryPhoto!.count > 0) {
             let urlHelper: UrlHelper = UrlHelper()
-            photoObj = urlHelper.populatePhoto(arrayDictionaryPhoto![photoIndex])
+            photoObj = urlHelper.populatePhoto(arrayDictionaryPhoto![cellPhotoIndex])
+            
+            // Remove the photo from array to avoid duplicated photos.
+            arrayDictionaryPhoto?.removeAtIndex(cellPhotoIndex)
         }
         return photoObj
     }
@@ -212,12 +200,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         // As we are just replacing those images it's needed first remove them
         // Removing
-        var greaterIDNumber: NSNumber = 0
         if (photos?.count) > 0 {
             for tempPhoto: Photo in photos! {
-                if (tempPhoto.id as Int) >= (greaterIDNumber as Int) {
-                    greaterIDNumber = tempPhoto.id
-                }
                 // Now using prepare for deletion into entity
                 // tempPhoto.posterImage = nil
                 sharedContext.deleteObject(tempPhoto)
@@ -228,41 +212,38 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     print("Error : \(error.localizedDescription)")
                 }
             }
-            photoIndex = greaterIDNumber as Int
-            print("--- PHOTO INDEX higher value \(photoIndex)")
             CoreDataStackManager.sharedInstance().saveContext()
-        }
-        
-        
-        // Change to false the line bellow and enable the second line to have option to select a picture
-        // instead random
-        helperObject.requestSearch(urlToCall: urlToCall, pin: pin, greaterID: greaterIDNumber as Int, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
-            if let dataResultTemp = result {
-                dispatch_async(dispatch_get_main_queue()) {
-                    self.picturesGridCol.hidden = false
-                    self.noImageLbl.hidden = true
-                    self.newCollectionBtn.enabled = true
-                    self.dataDictionary = dataResultTemp
-                    self.jsonPhotos = self.dataDictionary!!["photos"] as? [String : AnyObject]
-                    self.arrayDictionaryPhoto = self.jsonPhotos!["photo"] as? [[String : AnyObject]]
-                    self.spinner.hide()
-                    if (self.arrayDictionaryPhoto?.count < self.batchSize) {
-                        self.batchSize = (self.arrayDictionaryPhoto?.count)!
-                    } else {
-                        self.batchSize = VTConstants.BATCH_SIZE  // Assign the value here to reload data just when I have the dictionary
+            self.picturesGridCol.reloadData()
+        } else {
+            // Change to false the line bellow and enable the second line to have option to select a picture
+            // instead random
+            helperObject.requestSearch(urlToCall: urlToCall, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
+                if let dataResultTemp = result {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.picturesGridCol.hidden = false
+                        self.noImageLbl.hidden = true
+                        self.newCollectionBtn.enabled = true
+                        self.dataDictionary = dataResultTemp
+                        self.jsonPhotos = self.dataDictionary!!["photos"] as? [String : AnyObject]
+                        self.arrayDictionaryPhoto = self.jsonPhotos!["photo"] as? [[String : AnyObject]]
+                        self.spinner.hide()
+                        if (self.arrayDictionaryPhoto?.count < self.batchSize) {
+                            self.batchSize = (self.arrayDictionaryPhoto?.count)!
+                        } else {
+                            self.batchSize = VTConstants.BATCH_SIZE  // Assign the value here to reload data just when I have the dictionary
+                        }
+                        self.picturesGridCol.reloadData()
                     }
-                    self.picturesGridCol.reloadData()
+                } else {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.newCollectionBtn.enabled = true
+                        self.spinner.hide()
+                        Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error!, controller: controller)
+                    }
                 }
                 
-            } else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    self.newCollectionBtn.enabled = true
-                    self.spinner.hide()
-                    Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error!, controller: controller)
-                }
-            }
-            
-        })
+            })
+        }
     }
     
     
@@ -278,7 +259,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Make the call for load a new collection
     //
     func callNewCollection() {
-        isCallNewCollection = true
+        urlHelper = UrlHelper()
         newCollectionBtn.enabled = false
         spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
         view.addSubview(spinner)
@@ -369,37 +350,24 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Return the PhotoResult populated
     //
-    func requestPhoto(photoObj: PhotoComplete?, indexId: Int!) ->(photoObject: Photo?, errorMessage: String?){
+    func requestPhoto(photoObj: PhotoComplete!, imageTemp: UIImage!, indexId: Int!) {
         var tempPhoto: Photo?
         
-        if let _ = photoObj {
-            let urlHelper: UrlHelper = UrlHelper()
-            let urlToCall: String = urlHelper.assembleUrlToLoadImageFromSearch(photoObj!)
+        if let _ = imageTemp {
+            let tempId: Int = indexId + 1  // For some reason indexId++ was giving me error
+            print("--- ID : \(tempId)")
+            let dictionary: [String: AnyObject] = [
+                Photo.Keys.ID : tempId,
+                Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
+            ]
             
-            let url: NSURL = NSURL(string: urlToCall)!
-            if let imageData = NSData(contentsOfURL: url) {
-                let imageTemp: UIImage? = UIImage(data: imageData)!
-                
-                if let _ = imageTemp {
-                    let tempId: Int = indexId + 1  // For some reason indexId++ was giving me error
-                    print("--- ID : \(tempId)")
-                    let dictionary: [String: AnyObject] = [
-                        Photo.Keys.ID : tempId,
-                        Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
-                    ]
-                    
-                    tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)
-                    tempPhoto!.position = appDelegate.pinSelected
-                    tempPhoto!.posterImage = imageTemp
-                    
-                    photos?.append(tempPhoto!)
-                }
-            }
-            return (photoObject: tempPhoto, errorMessage: nil)
-        } else {
-            return (photoObject: nil, errorMessage: "No result Found!")
+            tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)
+            tempPhoto!.position = appDelegate.pinSelected
+            tempPhoto!.posterImage = imageTemp
+            
+            photos?.append(tempPhoto!)
+            CoreDataStackManager.sharedInstance().saveContext()
         }
     }
-    
     
 }
