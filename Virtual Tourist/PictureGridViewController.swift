@@ -156,10 +156,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                         cell.labelCell?.text = "\(indexPath.row)"
                         cell.imageViewTableCell?.image = imageTemp//tempPhoto!.posterImage
                         cell.cellSpinner.stopAnimating()
-                        
-                        if (self.photos?.count == self.batchSize) {
-                            CoreDataStackManager.sharedInstance().saveContext()
-                        }
                     })
                 }
             })
@@ -213,6 +209,9 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 }
             }
             CoreDataStackManager.sharedInstance().saveContext()
+            photos?.removeAll()
+            self.spinner.hide()
+            self.newCollectionBtn.enabled = true
             self.picturesGridCol.reloadData()
         } else {
             // Change to false the line bellow and enable the second line to have option to select a picture
