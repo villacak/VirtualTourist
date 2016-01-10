@@ -130,6 +130,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Loop through each item to display it
     //
+    // Should have a more ellegant way to work this out, I don't really like how this async tasks and completionHandlers work
+    //
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
@@ -150,40 +152,50 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             if let imageTemp = photoTemp!.posterImage {
                 cell.imageViewTableCell?.image = imageTemp
             } else {
-                let tempPhotoComplete: PhotoComplete = cellUrlHelper(localId)
-                let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
-                let url: NSURL = NSURL(string: urlToCall)!
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-                    if let imageData = NSData(contentsOfURL: url) {
-                        let imageTemp: UIImage? = UIImage(data: imageData)!
-                        
-                        dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
-                            self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: localId)
+                loadImageAsync(localId, completionHandler: { (result, error) -> Void in
+                    if let _ = result {
+                        dispatch_async(dispatch_get_main_queue()) {
                             cell.cellSpinner.hidden = true
-                            cell.imageViewTableCell?.image = imageTemp
+                            cell.imageViewTableCell?.image = result
                             cell.cellSpinner.stopAnimating()
-                        })
+                        }
                     }
+                    
                 })
             }
         } else {
-            let tempPhotoComplete: PhotoComplete = cellUrlHelper(localId)
-            let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
-            let url: NSURL = NSURL(string: urlToCall)!
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-                if let imageData = NSData(contentsOfURL: url) {
-                    let imageTemp: UIImage? = UIImage(data: imageData)!
-                    
-                    dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
-                        self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: localId)
+            loadImageAsync(localId, completionHandler: { (result, error) -> Void in
+                if let _ = result {
+                    dispatch_async(dispatch_get_main_queue()) {
                         cell.cellSpinner.hidden = true
-                        cell.imageViewTableCell?.image = imageTemp
+                        cell.imageViewTableCell?.image = result
                         cell.cellSpinner.stopAnimating()
-                    })
+                    }
                 }
             })
         }
         return cell
+    }
+    
+    
+    //
+    // Load images asynchronous
+    //
+    func loadImageAsync(indexToLoad: Int!, completionHandler:(result: UIImage?, error: String?) -> Void) {
+        let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexToLoad)
+        let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
+        let url: NSURL = NSURL(string: urlToCall)!
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+            if let imageData = NSData(contentsOfURL: url) {
+                let imageTemp: UIImage? = UIImage(data: imageData)!
+                
+                dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
+                    self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexToLoad)
+                    self.picturesGridCol.reloadData()
+                    completionHandler(result: imageTemp, error: nil)
+                })
+            }
+        })
     }
     
     
