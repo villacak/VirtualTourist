@@ -140,13 +140,17 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         print("indexPath.row \(indexPath.row)")
         
+        var localId: Int = indexPath.row
+        if (greatestId >= batchSize) {
+            localId = greatestId + indexPath.row
+        }
         if (photos!.count > 0 && photos?.count > indexPath.row) {
             let photoTemp = self.photos?[indexPath.row]
             cell.cellSpinner.stopAnimating()
             if let imageTemp = photoTemp!.posterImage {
                 cell.imageViewTableCell?.image = imageTemp
             } else {
-                let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexPath.row)
+                let tempPhotoComplete: PhotoComplete = cellUrlHelper(localId)
                 let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
                 let url: NSURL = NSURL(string: urlToCall)!
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
@@ -154,7 +158,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                         let imageTemp: UIImage? = UIImage(data: imageData)!
                         
                         dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
-                            self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexPath.row)
+                            self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: localId)
                             cell.cellSpinner.hidden = true
                             cell.imageViewTableCell?.image = imageTemp
                             cell.cellSpinner.stopAnimating()
@@ -163,10 +167,6 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 })
             }
         } else {
-            var localId: Int = indexPath.row
-            if (greatestId >= batchSize) {
-                localId = greatestId + indexPath.row
-            }
             let tempPhotoComplete: PhotoComplete = cellUrlHelper(localId)
             let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
             let url: NSURL = NSURL(string: urlToCall)!
