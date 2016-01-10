@@ -27,6 +27,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var batchSize: Int = 0
     var photoIndex: Int = 0
     var isJustLoad: Bool = false
+    var greatestId: Int = 0
     
     var jsonPhotos: [String : AnyObject]? = [String : AnyObject]()
     var arrayDictionaryPhoto: [[String : AnyObject]]? = [[String : AnyObject]]()
@@ -162,7 +163,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 })
             }
         } else {
-            let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexPath.row)
+            var localId: Int = indexPath.row
+            if (greatestId >= batchSize) {
+                localId = greatestId + indexPath.row
+            }
+            let tempPhotoComplete: PhotoComplete = cellUrlHelper(localId)
             let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
             let url: NSURL = NSURL(string: urlToCall)!
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
@@ -170,7 +175,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     let imageTemp: UIImage? = UIImage(data: imageData)!
                     
                     dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
-                        self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexPath.row)
+                        self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: localId)
                         cell.cellSpinner.hidden = true
                         cell.imageViewTableCell?.image = imageTemp
                         cell.cellSpinner.stopAnimating()
@@ -217,8 +222,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         // Removing
         if (photos?.count) > 0 && !isJustLoad{
             for tempPhoto: Photo in photos! {
-                // Now using prepare for deletion into entity
-                // tempPhoto.posterImage = nil
+                let photoId: Int = tempPhoto.id as Int
+                if (photoId > greatestId) {
+                    greatestId = photoId
+                }
                 sharedContext.deleteObject(tempPhoto)
                 do {
                     try sharedContext.save()
