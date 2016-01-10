@@ -248,6 +248,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             }
             CoreDataStackManager.sharedInstance().saveContext()
             photos?.removeAll()
+            
+            if greatestId == 250 {
+                greatestId = 0
+            }
+            
             self.newCollectionBtn.enabled = true
             if (!self.isJustLoad) {
                 self.spinner.hide()
