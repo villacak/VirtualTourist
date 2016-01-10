@@ -21,14 +21,16 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     var dataDictionary: NSDictionary?!
     var appDelegate: AppDelegate!
     var photos: [Photo]?
-    var batchSize: Int = 0
-    var photoIndex: Int = 0//250
-    var jsonPhotos: [String : AnyObject]?
-    var arrayDictionaryPhoto: [[String : AnyObject]]?
-    
-    var inMemoryCache = NSCache()
     var spinner: ActivityIndicatorViewExt!
     var urlHelper: UrlHelper!
+    
+    var batchSize: Int = 0
+    var photoIndex: Int = 0
+    var isJustLoad: Bool = false
+    
+    var jsonPhotos: [String : AnyObject]? = [String : AnyObject]()
+    var arrayDictionaryPhoto: [[String : AnyObject]]? = [[String : AnyObject]]()
+    var inMemoryCache = NSCache()
     
     // Create the shared context
     var sharedContext: NSManagedObjectContext {
@@ -55,18 +57,18 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         if let tempPhotos = appDelegate.pinSelected!.photos {
             photos = tempPhotos.allObjects as NSArray as? [Photo]
             if photos?.count > 0 {
+                isJustLoad = true
+                callNewCollection()
                 picturesGridCol.hidden = false
                 noImageLbl.hidden = true
-                if (photos?.count < VTConstants.BATCH_SIZE) {
-                    batchSize = photos!.count
-                } else {
-                    batchSize = VTConstants.BATCH_SIZE
-                }
+                batchSize = VTConstants.BATCH_SIZE
             } else {
+                isJustLoad = false
                 photos = [Photo]()
                 defaultSettingsForEmptyArray()
             }
         } else {
+            isJustLoad = false
             photos = [Photo]()
             defaultSettingsForEmptyArray()
         }
@@ -140,7 +142,25 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         if (photos!.count > 0 && photos?.count > indexPath.row) {
             let photoTemp = self.photos?[indexPath.row]
             cell.cellSpinner.stopAnimating()
-            cell.imageViewTableCell?.image = photoTemp!.posterImage
+            if let imageTemp = photoTemp!.posterImage {
+                cell.imageViewTableCell?.image = imageTemp
+            } else {
+                let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexPath.row)
+                let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
+                let url: NSURL = NSURL(string: urlToCall)!
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
+                    if let imageData = NSData(contentsOfURL: url) {
+                        let imageTemp: UIImage? = UIImage(data: imageData)!
+                        
+                        dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
+                            self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexPath.row)
+                            cell.cellSpinner.hidden = true
+                            cell.imageViewTableCell?.image = imageTemp
+                            cell.cellSpinner.stopAnimating()
+                        })
+                    }
+                })
+            }
         } else {
             let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexPath.row)
             let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
@@ -151,10 +171,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     
                     dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
                         self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexPath.row)
-                        cell.cellSpinner.stopAnimating()
                         cell.cellSpinner.hidden = true
-                        cell.labelCell?.text = "\(indexPath.row)"
-                        cell.imageViewTableCell?.image = imageTemp//tempPhoto!.posterImage
+                        cell.imageViewTableCell?.image = imageTemp
                         cell.cellSpinner.stopAnimating()
                     })
                 }
@@ -175,6 +193,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             
             // Remove the photo from array to avoid duplicated photos.
             arrayDictionaryPhoto?.removeAtIndex(cellPhotoIndex)
+            print("ArrayDicPhoto counter \(arrayDictionaryPhoto?.count)")
         }
         return photoObj
     }
@@ -196,7 +215,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         
         // As we are just replacing those images it's needed first remove them
         // Removing
-        if (photos?.count) > 0 {
+        if (photos?.count) > 0 && !isJustLoad{
             for tempPhoto: Photo in photos! {
                 // Now using prepare for deletion into entity
                 // tempPhoto.posterImage = nil
@@ -210,10 +229,14 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             }
             CoreDataStackManager.sharedInstance().saveContext()
             photos?.removeAll()
-            self.spinner.hide()
             self.newCollectionBtn.enabled = true
+            if (!self.isJustLoad) {
+                self.spinner.hide()
+            }
             self.picturesGridCol.reloadData()
-        } else {
+        }
+        
+        if (arrayDictionaryPhoto!.count) == 0 {
             // Change to false the line bellow and enable the second line to have option to select a picture
             // instead random
             helperObject.requestSearch(urlToCall: urlToCall, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
@@ -225,7 +248,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                         self.dataDictionary = dataResultTemp
                         self.jsonPhotos = self.dataDictionary!!["photos"] as? [String : AnyObject]
                         self.arrayDictionaryPhoto = self.jsonPhotos!["photo"] as? [[String : AnyObject]]
-                        self.spinner.hide()
+                        
+                        if (!self.isJustLoad) {
+                            self.spinner.hide()
+                        }
                         if (self.arrayDictionaryPhoto?.count < self.batchSize) {
                             self.batchSize = (self.arrayDictionaryPhoto?.count)!
                         } else {
@@ -250,6 +276,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // New Collection Button
     //
     @IBAction func newCollectionBtn(sender: AnyObject) {
+        isJustLoad = false
         callNewCollection()
     }
     
@@ -260,8 +287,11 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     func callNewCollection() {
         urlHelper = UrlHelper()
         newCollectionBtn.enabled = false
-        spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
-        view.addSubview(spinner)
+        
+        if (!isJustLoad) {
+            spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
+            view.addSubview(spinner)
+        }
         
         let latString: String = String((appDelegate.pinSelected?.latitude)!)
         let lonString: String = String((appDelegate.pinSelected?.longitude)!)
@@ -297,7 +327,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 // It's not needed add tempPhoto.posterImage = nil as it's been done into the Photo entity.
                 sharedContext.deleteObject(tempPhoto)
                 try sharedContext.save()
-                Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 2, controller: self)
+                Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 1, controller: self)
                 CoreDataStackManager.sharedInstance().saveContext()
                 photos?.removeAtIndex(photoIndexForDelete)
                 batchSize-- // Need to reduce the batch size to don't have problem when scrolling photos
@@ -312,7 +342,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     
                     // Return to the previous view as doesn't have photos anymore
                     // It's needed to hold a bit to the Dialog be dimissed to then return
-                    let delay = 2 * Double(NSEC_PER_SEC)
+                    let delay = 1.5 * Double(NSEC_PER_SEC)
                     let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
                     dispatch_after(time, dispatch_get_main_queue(), {
                         self.navigationController?.popToRootViewControllerAnimated(true)
@@ -341,7 +371,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         if isDeleted {
             appDelegate.pins = utils.removePinFromArray(pinArray: appDelegate.pins, pinToRemove: annotationPoint)
             CoreDataStackManager.sharedInstance().saveContext()
-            Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 2, controller: self)
+            Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_MESSAGE, secondsToDismmis: 1, controller: self)
         }
     }
     
@@ -352,20 +382,22 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     func requestPhoto(photoObj: PhotoComplete!, imageTemp: UIImage!, indexId: Int!) {
         var tempPhoto: Photo?
         
-        if let _ = imageTemp {
-            let tempId: Int = indexId + 1  // For some reason indexId++ was giving me error
-            print("--- ID : \(tempId)")
-            let dictionary: [String: AnyObject] = [
-                Photo.Keys.ID : tempId,
-                Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
-            ]
-            
-            tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)
-            tempPhoto!.position = appDelegate.pinSelected
-            tempPhoto!.posterImage = imageTemp
-            
-            photos?.append(tempPhoto!)
-            CoreDataStackManager.sharedInstance().saveContext()
+        if let _ = photoObj {
+            if let _ = imageTemp {
+                let tempId: Int = indexId + 1  // For some reason indexId++ was giving me error
+                print("--- ID : \(tempId)")
+                let dictionary: [String: AnyObject] = [
+                    Photo.Keys.ID : tempId,
+                    Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
+                ]
+                
+                tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)
+                tempPhoto!.position = appDelegate.pinSelected
+                tempPhoto!.posterImage = imageTemp
+                
+                photos?.append(tempPhoto!)
+                CoreDataStackManager.sharedInstance().saveContext()
+            }
         }
     }
     
