@@ -354,7 +354,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 1, controller: self)
                 CoreDataStackManager.sharedInstance().saveContext()
                 photos?.removeAtIndex(photoIndexForDelete)
-                batchSize-- // Need to reduce the batch size to don't have problem when scrolling photos
+                batchSize -= 1 // Need to reduce the batch size to don't have problem when scrolling photos
                 self.picturesGridCol.reloadData()
                 
                 if (photos?.count == 0) {

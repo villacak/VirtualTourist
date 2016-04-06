@@ -17,9 +17,10 @@ class Utils: NSObject {
     //
     // Remove the Pin object from the Array, from the MKPointAnnotation
     //
-    func removePinFromArray(var pinArray pinArray: [Pin], pinToRemove: MKAnnotation) -> [Pin]{
+    func removePinFromArray(pinArray pinArray: [Pin], pinToRemove: MKAnnotation) -> [Pin]{
+        var tempPinArray: [Pin] = pinArray
         var idToRemove: Int!
-        for tempPin: Pin in pinArray {
+        for tempPin: Pin in tempPinArray {
             if tempPin.latitude == pinToRemove.coordinate.latitude &&
                 tempPin.longitude == pinToRemove.coordinate.longitude {
                     idToRemove = tempPin.id as Int
@@ -29,12 +30,12 @@ class Utils: NSObject {
         
         if let _ = idToRemove {
             if idToRemove > 0 {
-                pinArray.removeAtIndex(idToRemove - 1)
+                tempPinArray.removeAtIndex(idToRemove - 1)
             } else if idToRemove == 0 {
-                pinArray.removeAtIndex(idToRemove)
+                tempPinArray.removeAtIndex(idToRemove)
             }
         }
-        return pinArray
+        return tempPinArray
     }
     
     

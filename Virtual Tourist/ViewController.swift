@@ -20,7 +20,6 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     @IBOutlet weak var editBtn: UIBarButtonItem!
     @IBOutlet weak var vtMapView: MKMapView!
     
-    
     var appDelegate: AppDelegate!
     var spinner: ActivityIndicatorViewExt!
     
@@ -52,7 +51,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         appDelegate.pins = [Pin]()
         
         // Add the touch listener
-        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "handleLongTouch:")
+        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: #selector(ViewController.handleLongTouch(_:)))
         longPressRecogniser.minimumPressDuration = 0.8
         vtMapView.addGestureRecognizer(longPressRecogniser)
         
