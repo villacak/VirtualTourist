@@ -9,6 +9,26 @@
 import UIKit
 import MapKit
 import CoreData
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class PictureGridViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
     
@@ -45,7 +65,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
         
         picturesGridCol.delegate = self
         picturesGridCol.dataSource = self
@@ -60,8 +80,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             if photos?.count > 0 {
                 isJustLoad = true
                 callNewCollection()
-                picturesGridCol.hidden = false
-                noImageLbl.hidden = true
+                picturesGridCol.isHidden = false
+                noImageLbl.isHidden = true
                 batchSize = VTConstants.BATCH_SIZE
             } else {
                 isJustLoad = false
@@ -73,7 +93,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             photos = [Photo]()
             defaultSettingsForEmptyArray()
         }
-        newCollectionBtn.enabled = true
+        newCollectionBtn.isEnabled = true
     }
     
     
@@ -81,15 +101,15 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     // Just a function to don't have neat and clean code
     //
     func defaultSettingsForEmptyArray() {
-        picturesGridCol.hidden = true
-        noImageLbl.hidden = false
+        picturesGridCol.isHidden = true
+        noImageLbl.isHidden = false
         callNewCollection()
     }
     
     //
     // Called just after viewDidLoad and just before the view appear
     //
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         
         let doubleLat: Double = Double((appDelegate.pinSelected?.latitude)!)
@@ -100,7 +120,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         vtMapView.addAnnotation(tempPointAnnotation)
         
         let userLocation: CLLocationCoordinate2D = CLLocationCoordinate2DMake(tempPointAnnotation.coordinate.latitude, tempPointAnnotation.coordinate.longitude)
-        vtMapView.setCenterCoordinate(userLocation, animated: true)
+        vtMapView.setCenter(userLocation, animated: true)
         
         let viewRegion = MKCoordinateRegionMakeWithDistance(userLocation, 500, 500)
         vtMapView.setRegion(viewRegion, animated: false)
@@ -110,7 +130,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Called just before the view disappear
     //
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         photos?.removeAll()
         appDelegate.pinSelected = nil
@@ -122,7 +142,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Return the count value that has the amount of items within the array
     //
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return batchSize
     }
     
@@ -132,30 +152,30 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Should have a more ellegant way to work this out, I don't really like how this async tasks and completionHandlers work
     //
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let reusedIdentifier = "PictureSecondView"
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reusedIdentifier, forIndexPath: indexPath) as! PinCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reusedIdentifier, for: indexPath) as! PinCollectionViewCell
         cell.imageViewTableCell?.layer.borderWidth = 1.0
-        cell.imageViewTableCell?.layer.borderColor = UIColor.blackColor().CGColor
-        cell.labelCell?.text = "\(indexPath.row)"
+        cell.imageViewTableCell?.layer.borderColor = UIColor.black.cgColor
+        cell.labelCell?.text = "\((indexPath as NSIndexPath).row)"
         cell.cellSpinner.startAnimating()
         
-        print("indexPath.row \(indexPath.row)")
+        print("indexPath.row \((indexPath as NSIndexPath).row)")
         
-        var localId: Int = indexPath.row
+        var localId: Int = (indexPath as NSIndexPath).row
         if (greatestId >= batchSize) {
-            localId = greatestId + indexPath.row
+            localId = greatestId + (indexPath as NSIndexPath).row
         }
-        if (photos!.count > 0 && photos?.count > indexPath.row) {
-            let photoTemp = self.photos?[indexPath.row]
+        if (photos!.count > 0 && photos?.count > (indexPath as NSIndexPath).row) {
+            let photoTemp = self.photos?[(indexPath as NSIndexPath).row]
             cell.cellSpinner.stopAnimating()
             if let imageTemp = photoTemp!.posterImage {
                 cell.imageViewTableCell?.image = imageTemp
             } else {
                 loadImageAsync(localId, completionHandler: { (result, error) -> Void in
                     if let _ = result {
-                        dispatch_async(dispatch_get_main_queue()) {
-                            cell.cellSpinner.hidden = true
+                        DispatchQueue.main.async {
+                            cell.cellSpinner.isHidden = true
                             cell.imageViewTableCell?.image = result
                             cell.cellSpinner.stopAnimating()
                         }
@@ -166,8 +186,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
         } else {
             loadImageAsync(localId, completionHandler: { (result, error) -> Void in
                 if let _ = result {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        cell.cellSpinner.hidden = true
+                    DispatchQueue.main.async {
+                        cell.cellSpinner.isHidden = true
                         cell.imageViewTableCell?.image = result
                         cell.cellSpinner.stopAnimating()
                     }
@@ -181,18 +201,18 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Load images asynchronous
     //
-    func loadImageAsync(indexToLoad: Int!, completionHandler:(result: UIImage?, error: String?) -> Void) {
+    func loadImageAsync(_ indexToLoad: Int!, completionHandler:@escaping (_ result: UIImage?, _ error: String?) -> Void) {
         let tempPhotoComplete: PhotoComplete = cellUrlHelper(indexToLoad)
         let urlToCall: String = self.urlHelper.assembleUrlToLoadImageFromSearch(tempPhotoComplete)
-        let url: NSURL = NSURL(string: urlToCall)!
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), { () -> Void in
-            if let imageData = NSData(contentsOfURL: url) {
+        let url: URL = URL(string: urlToCall)!
+        DispatchQueue.global(priority: DispatchQueue.GlobalQueuePriority.background).async(execute: { () -> Void in
+            if let imageData = try? Data(contentsOf: url) {
                 let imageTemp: UIImage? = UIImage(data: imageData)!
                 
-                dispatch_barrier_async(dispatch_get_main_queue(), {() -> Void in
+                DispatchQueue.main.async(flags: .barrier, execute: {() -> Void in
                     self.requestPhoto(tempPhotoComplete, imageTemp: imageTemp, indexId: indexToLoad)
                     self.picturesGridCol.reloadData()
-                    completionHandler(result: imageTemp, error: nil)
+                    completionHandler(imageTemp, nil)
                 })
             }
         })
@@ -202,14 +222,14 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Helper function foe the cell, load data
     //
-    func cellUrlHelper(cellPhotoIndex: Int!) -> PhotoComplete! {
+    func cellUrlHelper(_ cellPhotoIndex: Int!) -> PhotoComplete! {
         var photoObj: PhotoComplete?
         if (arrayDictionaryPhoto!.count > 0) {
             let urlHelper: UrlHelper = UrlHelper()
             photoObj = urlHelper.populatePhoto(arrayDictionaryPhoto![cellPhotoIndex])
             
             // Remove the photo from array to avoid duplicated photos.
-            arrayDictionaryPhoto?.removeAtIndex(cellPhotoIndex)
+            arrayDictionaryPhoto?.remove(at: cellPhotoIndex)
             print("ArrayDicPhoto counter \(arrayDictionaryPhoto?.count)")
         }
         return photoObj
@@ -219,15 +239,15 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Return to the collection view the max number of rows
     //
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        dialogWithOkAndCancel(indexPath.row)
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        dialogWithOkAndCancel((indexPath as NSIndexPath).row)
     }
     
     
     //
     // Function to call the service and populate data when response return
     //
-    func makeRESTCallAndGetResponse(urlToCall: String, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
+    func makeRESTCallAndGetResponse(_ urlToCall: String, pin: Pin!, controller: UIViewController, contextManaged: NSManagedObjectContext) {
         let helperObject: Requests = Requests()
         
         // As we are just replacing those images it's needed first remove them
@@ -238,7 +258,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 if (photoId > greatestId) {
                     greatestId = photoId
                 }
-                sharedContext.deleteObject(tempPhoto)
+                sharedContext.delete(tempPhoto)
                 do {
                     try sharedContext.save()
                 } catch let error as NSError {
@@ -253,7 +273,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 greatestId = 0
             }
             
-            self.newCollectionBtn.enabled = true
+            self.newCollectionBtn.isEnabled = true
             if (!self.isJustLoad) {
                 self.spinner.hide()
             }
@@ -265,10 +285,10 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
             // instead random
             helperObject.requestSearch(urlToCall: urlToCall, pin: pin, controller: controller, contextManaged: contextManaged, completionHandler: { (result, error) -> Void in
                 if let dataResultTemp = result {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.picturesGridCol.hidden = false
-                        self.noImageLbl.hidden = true
-                        self.newCollectionBtn.enabled = true
+                    DispatchQueue.main.async {
+                        self.picturesGridCol.isHidden = false
+                        self.noImageLbl.isHidden = true
+                        self.newCollectionBtn.isEnabled = true
                         self.dataDictionary = dataResultTemp
                         self.jsonPhotos = self.dataDictionary!!["photos"] as? [String : AnyObject]
                         self.arrayDictionaryPhoto = self.jsonPhotos!["photo"] as? [[String : AnyObject]]
@@ -284,8 +304,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                         self.picturesGridCol.reloadData()
                     }
                 } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.newCollectionBtn.enabled = true
+                    DispatchQueue.main.async {
+                        self.newCollectionBtn.isEnabled = true
                         self.spinner.hide()
                         Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error!, controller: controller)
                     }
@@ -299,7 +319,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // New Collection Button
     //
-    @IBAction func newCollectionBtn(sender: AnyObject) {
+    @IBAction func newCollectionBtn(_ sender: AnyObject) {
         isJustLoad = false
         callNewCollection()
     }
@@ -310,7 +330,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     func callNewCollection() {
         urlHelper = UrlHelper()
-        newCollectionBtn.enabled = false
+        newCollectionBtn.isEnabled = false
         
         if (!isJustLoad) {
             spinner = ActivityIndicatorViewExt(text: VTConstants.PREPARING)
@@ -328,32 +348,32 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Dialog for be used by the delete photo from collection view
     //
-    func dialogWithOkAndCancel(photoIndexForDelete: Int!) {
-        let alert: UIAlertController = UIAlertController(title: VTConstants.DELETE, message: VTConstants.DELETE_SINGLE_PIC, preferredStyle: UIAlertControllerStyle.Alert)
-        let ok: UIAlertAction = UIAlertAction(title: "Ok", style: .Default, handler: { (action: UIAlertAction!) in
+    func dialogWithOkAndCancel(_ photoIndexForDelete: Int!) {
+        let alert: UIAlertController = UIAlertController(title: VTConstants.DELETE, message: VTConstants.DELETE_SINGLE_PIC, preferredStyle: UIAlertControllerStyle.alert)
+        let ok: UIAlertAction = UIAlertAction(title: "Ok", style: .default, handler: { (action: UIAlertAction!) in
             self.deleteSinglePhoto(photoIndexForDelete)
         })
         
-        let cancel: UIAlertAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil)
+        let cancel: UIAlertAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil)
         
         alert.addAction(ok)
         alert.addAction(cancel)
-        self.presentViewController(alert, animated: true, completion: {})
+        self.present(alert, animated: true, completion: {})
     }
     
     
     //
     // Delete a single picture from the collection
     //
-    func deleteSinglePhoto(photoIndexForDelete: Int!) {
+    func deleteSinglePhoto(_ photoIndexForDelete: Int!) {
         if let tempPhoto = photos?[photoIndexForDelete] {
             do {
                 // It's not needed add tempPhoto.posterImage = nil as it's been done into the Photo entity.
-                sharedContext.deleteObject(tempPhoto)
+                sharedContext.delete(tempPhoto)
                 try sharedContext.save()
                 Dialog().timedDismissAlert(titleStr: VTConstants.DELETE, messageStr: VTConstants.DELETED_SINGLE_PIC, secondsToDismmis: 1, controller: self)
                 CoreDataStackManager.sharedInstance().saveContext()
-                photos?.removeAtIndex(photoIndexForDelete)
+                photos?.remove(at: photoIndexForDelete)
                 batchSize -= 1 // Need to reduce the batch size to don't have problem when scrolling photos
                 self.picturesGridCol.reloadData()
                 
@@ -361,15 +381,15 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                     removePin()
                     
                     // Set a flag to re-populate pins in the map from previous view
-                    let defaults = NSUserDefaults.standardUserDefaults()
-                    defaults.setObject(true, forKey: VTConstants.DEFAULT_KEY)
+                    let defaults = UserDefaults.standard
+                    defaults.set(true, forKey: VTConstants.DEFAULT_KEY)
                     
                     // Return to the previous view as doesn't have photos anymore
                     // It's needed to hold a bit to the Dialog be dimissed to then return
                     let delay = 1.5 * Double(NSEC_PER_SEC)
-                    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
-                    dispatch_after(time, dispatch_get_main_queue(), {
-                        self.navigationController?.popToRootViewControllerAnimated(true)
+                    let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
+                    DispatchQueue.main.asyncAfter(deadline: time, execute: {
+                        self.navigationController?.popToRootViewController(animated: true)
                     })
                 }
             } catch let error as NSError {
@@ -403,7 +423,7 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
     //
     // Return the PhotoResult populated
     //
-    func requestPhoto(photoObj: PhotoComplete!, imageTemp: UIImage!, indexId: Int!) {
+    func requestPhoto(_ photoObj: PhotoComplete!, imageTemp: UIImage!, indexId: Int!) {
         var tempPhoto: Photo?
         
         if let _ = photoObj {
@@ -411,8 +431,8 @@ class PictureGridViewController: UIViewController, UICollectionViewDataSource, U
                 let tempId: Int = indexId + 1  // For some reason indexId++ was giving me error
                 print("--- ID : \(tempId)")
                 let dictionary: [String: AnyObject] = [
-                    Photo.Keys.ID : tempId,
-                    Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg")
+                    Photo.Keys.ID : tempId as AnyObject,
+                    Photo.Keys.photo : String("\(photoObj!.id!)_\(photoObj!.secret!).jpg") as AnyObject
                 ]
                 
                 tempPhoto = Photo(photoDictionary: dictionary, context: sharedContext)

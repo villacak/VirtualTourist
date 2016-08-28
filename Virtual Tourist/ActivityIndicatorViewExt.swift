@@ -22,9 +22,9 @@ class ActivityIndicatorViewExt: UIVisualEffectView {
     }
     
     
-    let activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.White)
+    let activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.white)
     let label: UILabel = UILabel()
-    let blurEffect = UIBlurEffect(style: .Dark)
+    let blurEffect = UIBlurEffect(style: .dark)
     let vibrancyView: UIVisualEffectView
     
     
@@ -33,7 +33,7 @@ class ActivityIndicatorViewExt: UIVisualEffectView {
     //
     init(text: String) {
         self.text = text
-        self.vibrancyView = UIVisualEffectView(effect: UIVibrancyEffect(forBlurEffect: blurEffect))
+        self.vibrancyView = UIVisualEffectView(effect: UIVibrancyEffect(blurEffect: blurEffect))
         super.init(effect: blurEffect)
         self.setup()
     }
@@ -44,7 +44,7 @@ class ActivityIndicatorViewExt: UIVisualEffectView {
     //
     required init(coder aDecoder: NSCoder) {
         self.text = ""
-        self.vibrancyView = UIVisualEffectView(effect: UIVibrancyEffect(forBlurEffect: blurEffect))
+        self.vibrancyView = UIVisualEffectView(effect: UIVibrancyEffect(blurEffect: blurEffect))
         super.init(coder: aDecoder)!
         self.setup()
     }
@@ -70,25 +70,25 @@ class ActivityIndicatorViewExt: UIVisualEffectView {
             
             let width: CGFloat = 150
             let height: CGFloat = 50.0
-            self.frame = CGRectMake(superview.frame.size.width / 2 - width / 2,
-                superview.frame.height / 2 - height,
-                width,height)
+            self.frame = CGRect(x: superview.frame.size.width / 2 - width / 2,
+                y: superview.frame.height / 2 - height,
+                width: width,height: height)
             
             vibrancyView.frame = self.bounds
             
             let activityIndicatorSize: CGFloat = 40
-            activityIndicator.frame = CGRectMake(5, height / 2 - activityIndicatorSize / 2,
-                activityIndicatorSize,
-                activityIndicatorSize)
+            activityIndicator.frame = CGRect(x: 5, y: height / 2 - activityIndicatorSize / 2,
+                width: activityIndicatorSize,
+                height: activityIndicatorSize)
             
             layer.cornerRadius = 8.0
             layer.masksToBounds = true
             
             label.text = text
-            label.textAlignment = NSTextAlignment.Center
-            label.frame = CGRectMake(activityIndicatorSize + 5, 0, width - activityIndicatorSize - 20, height)
-            label.textColor = UIColor.grayColor()
-            label.font = UIFont.boldSystemFontOfSize(16)
+            label.textAlignment = NSTextAlignment.center
+            label.frame = CGRect(x: activityIndicatorSize + 5, y: 0, width: width - activityIndicatorSize - 20, height: height)
+            label.textColor = UIColor.gray
+            label.font = UIFont.boldSystemFont(ofSize: 16)
             
         }
     }
@@ -98,7 +98,7 @@ class ActivityIndicatorViewExt: UIVisualEffectView {
     // Show the view - Dialog
     //
     func show() {
-        self.hidden = false
+        self.isHidden = false
     }
     
     
@@ -106,6 +106,6 @@ class ActivityIndicatorViewExt: UIVisualEffectView {
     // Hide the view - Dialog
     //
     func hide() {
-        self.hidden = true
+        self.isHidden = true
     }
 }

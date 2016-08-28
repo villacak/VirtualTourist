@@ -26,14 +26,14 @@ class Pin: NSManagedObject {
     @NSManaged var photos: NSSet?
     
     
-    override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
-        super.init(entity: entity, insertIntoManagedObjectContext: context)
+    override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+        super.init(entity: entity, insertInto: context)
     }
     
     
     init(photoDictionary: [String: AnyObject], context: NSManagedObjectContext) {
-        let entity =  NSEntityDescription.entityForName(Keys.PinClass, inManagedObjectContext: context)!
-        super.init(entity: entity,insertIntoManagedObjectContext: context)
+        let entity =  NSEntityDescription.entity(forEntityName: Keys.PinClass, in: context)!
+        super.init(entity: entity,insertInto: context)
         
         id = photoDictionary[Keys.ID] as! Int
         latitude = photoDictionary[Keys.latitude] as! Double

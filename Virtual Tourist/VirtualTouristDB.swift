@@ -11,41 +11,41 @@ import Foundation
 
 class VirtualTouristDB: NSObject {
     
-    typealias CompletionHander = (result: AnyObject!, error: NSError?) -> Void
+    typealias CompletionHander = (_ result: AnyObject?, _ error: NSError?) -> Void
     
-    var session: NSURLSession
+    var session: URLSession
     var config = Config.unarchivedInstance() ?? Config()
     
     override init() {
-        session = NSURLSession.sharedSession()
+        session = URLSession.shared
         super.init()
     }
     
     //
     // MARK: - All purpose task method for data
     //
-    func taskForResource(resource: String, parameters: [String : AnyObject], completionHandler: CompletionHander) -> NSURLSessionDataTask {
+    func taskForResource(_ resource: String, parameters: [String : AnyObject], completionHandler: CompletionHander) -> URLSessionDataTask {
         var mutableParameters = parameters
         var mutableResource = resource
         
 
         mutableParameters["api_key"] = VTConstants.URL_KEY_API
-        if resource.rangeOfString(":id") != nil {
+        if resource.range(of: ":id") != nil {
             assert(parameters[Keys.ID] != nil)
-            mutableResource = mutableResource.stringByReplacingOccurrencesOfString(":id", withString: "\(parameters[Keys.ID]!)")
-            mutableParameters.removeValueForKey(Keys.ID)
+            mutableResource = mutableResource.replacingOccurrences(of: ":id", with: "\(parameters[Keys.ID]!)")
+            mutableParameters.removeValue(forKey: Keys.ID)
         }
         
         let urlString = VTConstants.URL_SEARCH_BASE + mutableResource + VirtualTouristDB.escapedParameters(mutableParameters)
-        let url = NSURL(string: urlString)!
-        let request = NSURLRequest(URL: url)
+        let url = URL(string: urlString)!
+        let request = URLRequest(url: url)
         
         print(url)
         
-        let task = session.dataTaskWithRequest(request) {data, response, downloadError in
+        let task = session.dataTask(with: request) {data, response, downloadError in
             if let error = downloadError {
-                let newError = VirtualTouristDB.errorForData(data, response: response, error: error)
-                completionHandler(result: nil, error: newError)
+                let newError = VirtualTouristDB.errorForData(data, response: response, error: error as NSError)
+                completionHandler(nil, newError)
             } else {
                 VirtualTouristDB.parseJSONWithCompletionHandler(data!, completionHandler: completionHandler)
             }
@@ -58,18 +58,18 @@ class VirtualTouristDB: NSObject {
     //
     // MARK: - All purpose task method for images
     //
-    func taskForImageWithSize(size: String, filePath: String, completionHandler: (imageData: NSData?, error: NSError?) ->  Void) -> NSURLSessionTask {
-        let baseURL = NSURL(string: config.baseImageURLString)!
-        let url = baseURL.URLByAppendingPathComponent(size).URLByAppendingPathComponent(filePath)
+    func taskForImageWithSize(_ size: String, filePath: String, completionHandler: @escaping (_ imageData: Data?, _ error: NSError?) ->  Void) -> URLSessionTask {
+        let baseURL = URL(string: config.baseImageURLString)!
+        let url = baseURL.appendingPathComponent(size).appendingPathComponent(filePath)
         print(url)
         
-        let request = NSURLRequest(URL: url)
-        let task = session.dataTaskWithRequest(request) {data, response, downloadError in
+        let request = URLRequest(url: url)
+        let task = session.dataTask(with: request) {data, response, downloadError in
             if let _ = downloadError {
-                let newError = VirtualTouristDB.errorForData(data, response: response, error: downloadError!)
-                completionHandler(imageData: nil, error: newError)
+                let newError = VirtualTouristDB.errorForData(data, response: response, error: downloadError! as NSError)
+                completionHandler(nil, newError)
             } else {
-                completionHandler(imageData: data, error: nil)
+                completionHandler(data, nil)
             }
         }
         task.resume()
@@ -80,16 +80,16 @@ class VirtualTouristDB: NSObject {
     //
     // MARK: - Update Config
     //
-    func taskForUpdatingConfig(completionHandler: (didSucceed: Bool, error: NSError?) -> Void) -> NSURLSessionTask {
+    func taskForUpdatingConfig(_ completionHandler: @escaping (_ didSucceed: Bool, _ error: NSError?) -> Void) -> URLSessionTask {
         let parameters = [String: AnyObject]()
         let task = taskForResource(Resources.Config, parameters: parameters) { JSONResult, error in
             if let error = error {
-                completionHandler(didSucceed: false, error: error)
+                completionHandler(false, error)
             } else if let newConfig = Config(dictionary: JSONResult as! [String : AnyObject]) {
                 self.config = newConfig
-                completionHandler(didSucceed: true, error: nil)
+                completionHandler(true, nil)
             } else {
-                completionHandler(didSucceed: false, error: NSError(domain: "Config", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not parse config"]))
+                completionHandler(false, NSError(domain: "Config", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not parse config"]))
             }
         }
         task.resume()
@@ -103,10 +103,10 @@ class VirtualTouristDB: NSObject {
     //
     // Try to make a better error, based on the status_message. If we cant then return the previous error
     //
-    class func errorForData(data: NSData?, response: NSURLResponse?, error: NSError) -> NSError {
+    class func errorForData(_ data: Data?, response: URLResponse?, error: NSError) -> NSError {
         var errorToReturn: NSError?
         do {
-            if let parsedResult = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.AllowFragments) as? [String : AnyObject] {
+            if let parsedResult = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.allowFragments) as? [String : AnyObject] {
                 if let errorMessage = parsedResult[VirtualTouristDB.Keys.ErrorStatusMessage] as? String {
                     let userInfo = [NSLocalizedDescriptionKey : errorMessage]
                     errorToReturn = NSError(domain: "VT Error", code: 1, userInfo: userInfo)
@@ -122,13 +122,13 @@ class VirtualTouristDB: NSObject {
     //
     // Parsing the JSON
     //
-    class func parseJSONWithCompletionHandler(data: NSData, completionHandler: CompletionHander) {
+    class func parseJSONWithCompletionHandler(_ data: Data, completionHandler: CompletionHander) {
         do {
-            let parsedResult: AnyObject? = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments)
-            completionHandler(result: parsedResult, error: nil)
+            let parsedResult: AnyObject? = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.allowFragments)
+            completionHandler(parsedResult, nil)
         } catch  {
             let tempError: NSError = NSError(domain: "Fail parsing JSON", code: 1, userInfo: nil)
-            completionHandler(result: nil, error: tempError)
+            completionHandler(nil, tempError)
         }
     }
     
@@ -136,14 +136,14 @@ class VirtualTouristDB: NSObject {
     //
     // URL Encoding a dictionary into a parameter string
     //
-    class func escapedParameters(parameters: [String : AnyObject]) -> String {
+    class func escapedParameters(_ parameters: [String : AnyObject]) -> String {
         var urlVars = [String]()
         for (key, value) in parameters {
             let stringValue = "\(value)"
-            let escapedValue = stringValue.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())
+            let escapedValue = stringValue.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)
             urlVars += [key + "=" + "\(escapedValue!)"]
         }
-        return (!urlVars.isEmpty ? "?" : "") + urlVars.joinWithSeparator("&")
+        return (!urlVars.isEmpty ? "?" : "") + urlVars.joined(separator: "&")
     }
     
     
@@ -160,11 +160,11 @@ class VirtualTouristDB: NSObject {
     //
     // MARK: - Shared Date Formatter
     //
-    class var sharedDateFormatter: NSDateFormatter  {
+    class var sharedDateFormatter: DateFormatter  {
         struct Singleton {
             static let dateFormatter = Singleton.generateDateFormatter()
-            static func generateDateFormatter() -> NSDateFormatter {
-                let formatter = NSDateFormatter()
+            static func generateDateFormatter() -> DateFormatter {
+                let formatter = DateFormatter()
                 formatter.dateFormat = "yyyy-mm-dd"
                 return formatter
             }

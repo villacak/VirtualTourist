@@ -20,9 +20,9 @@ class UrlHelper: NSObject { //, NSURLConnectionDelegate {
     //
     // Encode the Dictionary Strings
     //
-    func encodeParameters(params params: [String: String]) -> String {
-        let queryItems = params.map { NSURLQueryItem(name:$0, value:$1)}
-        let components = NSURLComponents()
+    func encodeParameters(params: [String: String]) -> String {
+        let queryItems = params.map { URLQueryItem(name:$0, value:$1)}
+        var components = URLComponents()
         components.queryItems = queryItems
         return components.percentEncodedQuery ?? VTConstants.EMPTY_STRING
     }
@@ -31,7 +31,7 @@ class UrlHelper: NSObject { //, NSURLConnectionDelegate {
     //
     // Assemble the Search with text url to perform a request for the search photo using a latitude and longitude
     //
-    func createSearchByLatitudeLogitudeRequestURL(lat lat: String!, lon: String!) -> String {
+    func createSearchByLatitudeLogitudeRequestURL(lat: String!, lon: String!) -> String {
         let urlParamsDictionary: Dictionary<String, String>  = [VTConstants.METHOD_DIC_KEY : VTConstants.URL_METHOD_SEARCH,
             VTConstants.API_DIC_KEY : VTConstants.URL_KEY_API,
             VTConstants.LATITUDE: lat!,
@@ -47,9 +47,9 @@ class UrlHelper: NSObject { //, NSURLConnectionDelegate {
     //
     // Parse NSDictionary to AnyObject - JSON
     //
-    func parseNSDictionaryToJSON(nsDictionary: NSDictionary) -> AnyObject {
-        let bytes: NSData = try! NSJSONSerialization.dataWithJSONObject(nsDictionary, options: NSJSONWritingOptions())
-        let jsonObj: AnyObject = (try! NSJSONSerialization.JSONObjectWithData(bytes, options: [])) as! NSDictionary
+    func parseNSDictionaryToJSON(_ nsDictionary: NSDictionary) -> AnyObject {
+        let bytes: Data = try! JSONSerialization.data(withJSONObject: nsDictionary, options: JSONSerialization.WritingOptions())
+        let jsonObj: AnyObject = (try! JSONSerialization.jsonObject(with: bytes, options: [])) as! NSDictionary
         return jsonObj
     }
     
@@ -57,7 +57,7 @@ class UrlHelper: NSObject { //, NSURLConnectionDelegate {
     //
     // Populate Photo object
     //
-    func populatePhoto(jsonObj: AnyObject) -> PhotoComplete {
+    func populatePhoto(_ jsonObj: AnyObject) -> PhotoComplete {
         let photoObjectToReturn: PhotoComplete = PhotoComplete()
         photoObjectToReturn.farm = String((jsonObj["farm"] as? Int)!)
         photoObjectToReturn.id = jsonObj["id"]! as? String
@@ -76,7 +76,7 @@ class UrlHelper: NSObject { //, NSURLConnectionDelegate {
     //
     // ASsemble the URL to load the images as per link: https://www.flickr.com/services/api/flickr.photos.search.html
     //
-    func assembleUrlToLoadImageFromSearch(item: PhotoComplete) -> String {
+    func assembleUrlToLoadImageFromSearch(_ item: PhotoComplete) -> String {
         // URL to forms : https://farm{farm-id}.staticflickr.com/{server-id}/{id}_{secret}.jpg
         let urlToReturn: String = "https://farm\(item.farm!).staticflickr.com/\(item.server!)/\(item.id!)_\(item.secret!).jpg"
         return urlToReturn

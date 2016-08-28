@@ -17,7 +17,7 @@ class Utils: NSObject {
     //
     // Remove the Pin object from the Array, from the MKPointAnnotation
     //
-    func removePinFromArray(pinArray pinArray: [Pin], pinToRemove: MKAnnotation) -> [Pin]{
+    func removePinFromArray(pinArray: [Pin], pinToRemove: MKAnnotation) -> [Pin]{
         var tempPinArray: [Pin] = pinArray
         var idToRemove: Int!
         for tempPin: Pin in tempPinArray {
@@ -30,9 +30,9 @@ class Utils: NSObject {
         
         if let _ = idToRemove {
             if idToRemove > 0 {
-                tempPinArray.removeAtIndex(idToRemove - 1)
+                tempPinArray.remove(at: idToRemove - 1)
             } else if idToRemove == 0 {
-                tempPinArray.removeAtIndex(idToRemove)
+                tempPinArray.remove(at: idToRemove)
             }
         }
         return tempPinArray
@@ -42,7 +42,7 @@ class Utils: NSObject {
     //
     // Retrieve the Pin object from MKPointAnnotation
     //
-    func retrievePinFromArray(pinArray pinArray: [Pin], pinToRemove: MKAnnotation) -> Pin? {
+    func retrievePinFromArray(pinArray: [Pin], pinToRemove: MKAnnotation) -> Pin? {
         var pinToReturn: Pin!
         for tempPin: Pin in pinArray {
             if tempPin.latitude == pinToRemove.coordinate.latitude &&
@@ -58,7 +58,7 @@ class Utils: NSObject {
     //
     // From latitude and longitude return MKPointAnnotation
     //
-    func retrieveAnnotation(latitude latitude: Double, longitude: Double) -> MKPointAnnotation {
+    func retrieveAnnotation(latitude: Double, longitude: Double) -> MKPointAnnotation {
         let annotationToReturn: MKPointAnnotation = MKPointAnnotation()
         annotationToReturn.coordinate.latitude = latitude
         annotationToReturn.coordinate.longitude = longitude
@@ -69,7 +69,7 @@ class Utils: NSObject {
     //
     // Remove pin, removes the pin from the DB
     //
-    func removePin(pinArray pinArray: [Pin]!, pinAnnotation: MKAnnotation!, sharedContext: NSManagedObjectContext, controller: UIViewController ) -> Bool {
+    func removePin(pinArray: [Pin]!, pinAnnotation: MKAnnotation!, sharedContext: NSManagedObjectContext, controller: UIViewController ) -> Bool {
         var isDeleted: Bool = false
         let util: Utils = Utils()
         let pinToRemove: Pin? = util.retrievePinFromArray(pinArray: pinArray, pinToRemove: pinAnnotation!)!
@@ -83,7 +83,7 @@ class Utils: NSObject {
         
         var result: [Pin]?
         do {
-            result = try sharedContext.executeFetchRequest(fetchRequest) as? [Pin]
+            result = try sharedContext.fetch(fetchRequest) as? [Pin]
         } catch let error as NSError{
             Dialog().okDismissAlert(titleStr: VTConstants.ERROR, messageStr: error.localizedDescription, controller: controller)
             print("Error: \(error.localizedDescription)")
@@ -95,7 +95,7 @@ class Utils: NSObject {
                 if (resultItem.latitude == pinToRemove?.latitude && resultItem.longitude == pinToRemove?.longitude) {
                     // Using delete rules for Pin as cascade I can delete all childs records wihtout need to loop through it
                     // removeCachedImages(resultItem.photos!)
-                    sharedContext.deleteObject(resultItem)
+                    sharedContext.delete(resultItem)
                     do {
                         try sharedContext.save()
                         isDeleted = true

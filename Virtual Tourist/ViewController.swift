@@ -28,9 +28,9 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     
     // Get the file path
     var filePath : String {
-        let manager = NSFileManager.defaultManager()
-        let url = manager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first! as NSURL
-        return url.URLByAppendingPathComponent("mapRegionArchive").path!
+        let manager = FileManager.default
+        let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first! as URL
+        return url.appendingPathComponent("mapRegionArchive").path
     }
     
     // Create the shared context
@@ -46,7 +46,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         super.viewDidLoad()
         
         vtMapView.delegate = self
-        appDelegate = (UIApplication.sharedApplication().delegate as! AppDelegate)
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
         
         appDelegate.pins = [Pin]()
         
@@ -66,17 +66,17 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // View will appear, 
     //
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         
         // I'm using this logic just to avoid repopulate the map, because I also could reload everything
         // Everytime the view will appear is called
-        let defaults = NSUserDefaults.standardUserDefaults()
-        if let isUpdatePins : Bool?  = defaults.boolForKey(VTConstants.DEFAULT_KEY) {
+        let defaults = UserDefaults.standard
+        if let isUpdatePins : Bool?  = defaults.bool(forKey: VTConstants.DEFAULT_KEY) {
             if isUpdatePins! {
                 // Change the update key
-                let defaults = NSUserDefaults.standardUserDefaults()
-                defaults.setObject(false, forKey: VTConstants.DEFAULT_KEY)
+                let defaults = UserDefaults.standard
+                defaults.set(false, forKey: VTConstants.DEFAULT_KEY)
                 
                 // Remove all annotations from the map
                 vtMapView.removeAnnotations(vtMapView.annotations)
@@ -105,7 +105,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
         do {
             let fetchRequest = NSFetchRequest(entityName: Pin.Keys.PinClass)
             fetchRequest.returnsObjectsAsFaults = false
-            let tempPinArray: [Pin] = try sharedContext.executeFetchRequest(fetchRequest) as! [Pin]
+            let tempPinArray: [Pin] = try sharedContext.fetch(fetchRequest) as! [Pin]
             if (tempPinArray.count > 0) {
                 for result: Pin in tempPinArray {
                     appDelegate.pins.append(result)
@@ -128,7 +128,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     func checkForPins() {
         if let _ = appDelegate.pins {
-            for (_, element) in appDelegate.pins.enumerate() {
+            for (_, element) in appDelegate.pins.enumerated() {
                 let tempPin: Pin = element
                 let utils: Utils = Utils()
                 let annotationTempAdd: MKPointAnnotation = utils.retrieveAnnotation(latitude: Double(tempPin.latitude), longitude: Double(tempPin.longitude))
@@ -141,17 +141,17 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Handle the tap touch
     //
-    func handleLongTouch(gestureRecognizer : UIGestureRecognizer) {
+    func handleLongTouch(_ gestureRecognizer : UIGestureRecognizer) {
         if (editingPins == false) {
-            if gestureRecognizer.state == UIGestureRecognizerState.Began {
+            if gestureRecognizer.state == UIGestureRecognizerState.began {
                 return
             }
         }
         
         //  If editing map, mean tapped on the edit navigation buttom
-        if (editingPins == false && gestureRecognizer.state == UIGestureRecognizerState.Ended) {
-            let touchPoint = gestureRecognizer.locationInView(self.vtMapView)
-            let touchMapCoordinate: CLLocationCoordinate2D = vtMapView.convertPoint(touchPoint, toCoordinateFromView: vtMapView)
+        if (editingPins == false && gestureRecognizer.state == UIGestureRecognizerState.ended) {
+            let touchPoint = gestureRecognizer.location(in: self.vtMapView)
+            let touchMapCoordinate: CLLocationCoordinate2D = vtMapView.convert(touchPoint, toCoordinateFrom: vtMapView)
             let annotation = MKPointAnnotation()
             annotation.coordinate = touchMapCoordinate
             
@@ -174,7 +174,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Add view to show the spin
     //
-    func startSpin(spinText spinText: String) {
+    func startSpin(spinText: String) {
         spinner = ActivityIndicatorViewExt(text: spinText)
         view.addSubview(spinner)
     }
@@ -183,13 +183,13 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Check for annotations for display
     //
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         if !(annotation is MKPointAnnotation) {
             return nil
         }
         
         var view: MKPinAnnotationView
-        if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(reusableId) as? MKPinAnnotationView {
+        if let dequeuedView = mapView.dequeueReusableAnnotationView(withIdentifier: reusableId) as? MKPinAnnotationView {
             dequeuedView.annotation = annotation
             view = dequeuedView
             view.animatesDrop = false
@@ -205,7 +205,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     // Check everytime that the user tap on top of an Pin annotation, if not in edit mode, than it will redirect the
     // to the next view, if in edit mode then delete the pin fmor view and DB
     //
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         
         if let _ = view.annotation {
             // Delete or redirect to the next view
@@ -225,7 +225,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
                     let utils: Utils = Utils()
                     appDelegate.pinSelected = utils.retrievePinFromArray(pinArray: appDelegate.pins, pinToRemove: view.annotation!)
                     if let _ = appDelegate.pinSelected {
-                        performSegueWithIdentifier("callPicGrid", sender: self)
+                        performSegue(withIdentifier: "callPicGrid", sender: self)
                         vtMapView.deselectAnnotation(view.annotation, animated: false)
                     }
                 }
@@ -237,7 +237,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Save the Map region
     //
-    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // Place the "center" and "span" of the map into a dictionary
         // The "span" is the width and height of the map in degrees.
         // It represents the zoom level of the map.
@@ -257,7 +257,7 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Edit button that change to done and vice versa
     //
-    @IBAction func editBtn(sender: AnyObject) {
+    @IBAction func editBtn(_ sender: AnyObject) {
         if (!editingPins) {
             vtMapView.setNeedsFocusUpdate()
             editingPins = true
@@ -275,10 +275,10 @@ class ViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDele
     //
     // Function to restore the Map Region
     //
-    func restoreMapRegion(animated: Bool) {
+    func restoreMapRegion(_ animated: Bool) {
         // if we can unarchive a dictionary, we will use it to set the map back to its
         // previous center and span
-        if let regionDictionary = NSKeyedUnarchiver.unarchiveObjectWithFile(filePath) as? [String : AnyObject] {
+        if let regionDictionary = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as? [String : AnyObject] {
             let longitude = regionDictionary["longitude"] as! CLLocationDegrees
             let latitude = regionDictionary["latitude"] as! CLLocationDegrees
             let center = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
